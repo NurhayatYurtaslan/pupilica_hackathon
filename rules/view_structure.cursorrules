@@ -1,0 +1,151 @@
+# View Structure Rules for Flutter App
+
+## Directory Structure
+```
+lib/app/views/
+├── {view_name}/
+│   ├── {view_name}_view.dart          # Main view widget
+│   └── models/
+│       ├── {view_name}_view_model.dart # BLoC implementation
+│       └── module/
+│           ├── event.dart             # BLoC events
+│           └── state.dart             # BLoC states
+```
+
+## File Naming Conventions
+
+### 1. View Files
+- **Main View**: `{view_name}_view.dart` (e.g., `splash_view.dart`, `home_view.dart`)
+- **View Model**: `{view_name}_view_model.dart` (e.g., `splash_view_model.dart`)
+- **Events**: `event.dart` (always in module folder)
+- **States**: `state.dart` (always in module folder)
+
+### 2. Class Naming
+- **View Widget**: `{ViewName}View` (e.g., `SplashView`, `HomeView`)
+- **BLoC**: `{ViewName}ViewModel` (e.g., `SplashViewModel`, `HomeViewModel`)
+- **Events**: `{ViewName}Event` (e.g., `SplashEvent`, `HomeEvent`)
+- **States**: `{ViewName}State` (e.g., `SplashState`, `HomeState`)
+
+## Code Structure Rules
+
+### 1. View File Structure (`{view_name}_view.dart`)
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:osmea_components/osmea_components.dart';
+import 'package:pupilica_hackathon/app/views/{view_name}/models/module/event.dart';
+import 'package:pupilica_hackathon/app/views/{view_name}/models/module/state.dart';
+import 'package:pupilica_hackathon/app/views/{view_name}/models/{view_name}_view_model.dart';
+
+class {ViewName}View extends StatelessWidget {
+  const {ViewName}View({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // System UI visibility management (if needed)
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    
+    return BlocProvider(
+      create: (context) => {ViewName}ViewModel()..add({ViewName}InitialEvent(context)),
+      child: BlocBuilder<{ViewName}ViewModel, {ViewName}State>(
+        builder: (context, state) {
+          return OsmeaComponents.scaffold(
+            body: OsmeaComponents.center(
+              child: OsmeaComponents.container(
+                child: OsmeaComponents.text('{ViewName}'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+### 2. View Model Structure (`{view_name}_view_model.dart`)
+```dart
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:osmea_components/osmea_components.dart';
+import 'package:pupilica_hackathon/app/views/{view_name}/models/module/event.dart';
+import 'package:pupilica_hackathon/app/views/{view_name}/models/module/state.dart';
+
+class {ViewName}ViewModel extends Bloc<{ViewName}Event, {ViewName}State> {
+  {ViewName}ViewModel() : super({ViewName}InitialState()) {
+    on<{ViewName}InitialEvent>(_on{ViewName}Initial);
+  }
+
+  Future<FutureOr<void>> _on{ViewName}Initial(
+    {ViewName}InitialEvent event,
+    Emitter<{ViewName}State> emit,
+  ) async {
+    await Future.delayed(event.context.durationMedium);
+    print('{ViewName} Initial');
+  }
+}
+```
+
+### 3. State Structure (`state.dart`)
+```dart
+abstract class {ViewName}State {}
+
+class {ViewName}InitialState extends {ViewName}State {}
+```
+
+### 4. Event Structure (`event.dart`)
+```dart
+import 'package:flutter/material.dart';
+
+abstract class {ViewName}Event {}
+
+class {ViewName}InitialEvent extends {ViewName}Event {
+  final BuildContext context;
+  {ViewName}InitialEvent(this.context);
+}
+```
+
+## Component Usage Rules
+
+### 1. Required Imports
+- Always import `osmea_components` for UI components
+- Use `flutter_bloc` for state management
+- Use `flutter/services.dart` for system UI management
+- Import local models with full package paths
+
+### 2. UI Component Guidelines
+- Use `OsmeaComponents.scaffold()` for main scaffold
+- Use `OsmeaComponents.center()` for centering content
+- Use `OsmeaComponents.container()` for containers
+- Use `OsmeaComponents.text()` for text elements
+- Use `OsmeaComponents.durationMedium` for timing delays
+
+### 3. State Management
+- Use BLoC pattern with `BlocProvider` and `BlocBuilder`
+- Pass `BuildContext` in events when needed for timing
+- Use `Future.delayed()` with `context.durationMedium` for delays
+- Keep state management simple and focused
+
+### 4. System UI Management
+- Use `SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky)` for fullscreen
+- Apply system UI changes in the `build` method when needed
+
+### 5. Import Structure
+- Use full package paths for local imports
+- Group imports: Flutter, packages, local files
+- Keep imports organized and clean
+
+## Best Practices
+
+1. **Simple Structure**: Keep the initial implementation simple and clean
+2. **Consistent Naming**: Follow the naming conventions strictly
+3. **Full Package Paths**: Use complete package paths for local imports
+4. **System UI**: Handle system UI visibility when needed
+5. **Timing**: Use `context.durationMedium` for consistent timing
+6. **Debugging**: Add print statements for debugging during development
+7. **Extensibility**: Structure allows for easy expansion when needed
+
+## Example Implementation
+See `splash/` folder for a complete implementation example following these rules.
