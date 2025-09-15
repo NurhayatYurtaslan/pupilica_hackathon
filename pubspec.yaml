@@ -18,6 +18,7 @@ dependencies:
 
   # UI Components
   cupertino_icons: ^1.0.8
+  device_frame: ^1.4.0
   osmea_components:
     git:
       url: https://github.com/masterfabric-mobile/osmea.git
