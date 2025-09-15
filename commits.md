@@ -31,6 +31,7 @@ Closes #42
 
 * ➕ **add**: add new things
 * ✨ **feat**: A new feature
+* 🔄 **update**: Update existing features or dependencies
 * 🐛 **fix**: A bug fix
 * 📖 **docs**: Documentation changes
 * 🎨 **style**: Code style changes (no logic)
