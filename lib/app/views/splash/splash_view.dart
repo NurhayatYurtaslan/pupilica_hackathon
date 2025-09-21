@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:osmea_components/osmea_components.dart';
-import 'package:pupilica_hackathon/core/helpers/logger.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/state.dart';
@@ -30,10 +29,10 @@ class SplashView extends StatelessWidget {
             }
           });
 
-          return Scaffold(
-            body: Container(
-              width: double.infinity,
-              height: double.infinity,
+          return OsmeaComponents.scaffold(
+            body: OsmeaComponents.container(
+              width: context.allWidth,
+              height: context.allHeight,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -48,11 +47,11 @@ class SplashView extends StatelessWidget {
                   stops: const [0.0, 0.2, 0.5, 0.8, 1.0],
                 ),
               ),
-              child: Column(
+              child: OsmeaComponents.column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // App logo
-                  Container(
+                  OsmeaComponents.container(
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
@@ -70,35 +69,31 @@ class SplashView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  OsmeaComponents.sizedBox(height: context.height40),
 
                   // App title
-                  const Text(
+                  OsmeaComponents.text(
                     'Pupilica AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
+                    fontSize: context.fontSizeExtraLarge,
+                    fontWeight: context.bold,
+                    color: Colors.white,
+                    textAlign: context.textCenter,
                   ),
 
-                  const SizedBox(height: 20),
+                  OsmeaComponents.sizedBox(height: context.height20),
 
                   // Loading indicator
-                  Container(
+                  OsmeaComponents.container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white.withValues(alpha: 0.9),
-                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         strokeWidth: 2,
                       ),
                     ),
