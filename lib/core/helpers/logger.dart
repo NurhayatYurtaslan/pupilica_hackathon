@@ -4,7 +4,18 @@ import 'dart:developer' as developer;
 enum LogLevel { debug, info, warning, error, success }
 
 /// Log categories enum
-enum LogCategory { splash, navigation, api, database, ui, auth, ocr, general }
+enum LogCategory {
+  splash,
+  navigation,
+  api,
+  database,
+  ui,
+  auth,
+  ocr,
+  document,
+  lesson,
+  general,
+}
 
 /// Simple logger class
 class Logger {
@@ -19,6 +30,8 @@ class Logger {
     LogCategory.ui: '🎨',
     LogCategory.auth: '🔐',
     LogCategory.ocr: '📄',
+    LogCategory.document: '📁',
+    LogCategory.lesson: '📚',
     LogCategory.general: '📝',
   };
 
