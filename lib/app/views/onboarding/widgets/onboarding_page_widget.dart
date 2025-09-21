@@ -21,12 +21,12 @@ class OnboardingPageWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.4),
-                width: 2,
-              ),
             ),
-            child: Icon(page.icon, size: 60, color: Colors.white),
+            child: Image.asset(
+              'assets/images/rocket-lica.png',
+              height: 60,
+              width: 60,
+            ),
           ),
 
           OsmeaComponents.sizedBox(height: context.height40),
