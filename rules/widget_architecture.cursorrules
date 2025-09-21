@@ -1,0 +1,455 @@
+# Widget Architecture Rules for Flutter App
+
+## Overview
+This document defines the architectural rules for creating and organizing widgets in the Flutter application. These rules ensure clean separation of concerns, maintainability, and consistent code structure.
+
+## 🎯 Core Principles
+
+### 1. **Widget Separation of Concerns**
+- **Views**: Handle state management, business logic, and data flow
+- **Widgets**: Pure UI components that receive data via parameters
+- **No State Control in Widgets**: Widgets should never contain state management logic
+
+### 2. **Data Flow Pattern**
+```
+View (State Management) → Widget (Pure UI) → User Interaction → View
+```
+
+## 📁 Widget Organization
+
+### Directory Structure
+```
+lib/app/views/[view_name]/
+├── [view_name]_view.dart          # Main view with state management
+└── widgets/                       # Pure UI widgets
+    ├── [widget_name]_widget.dart
+    ├── [another_widget]_widget.dart
+    └── ...
+```
+
+### Naming Conventions
+- **Views**: `[feature]_view.dart` (e.g., `home_view.dart`)
+- **Widgets**: `[widget_name]_widget.dart` (e.g., `home_header_widget.dart`)
+- **Classes**: `[WidgetName]Widget` (e.g., `HomeHeaderWidget`)
+
+## 🔧 Widget Creation Rules
+
+### ✅ DO - Widget Best Practices
+
+#### 1. **Pure UI Components**
+```dart
+// ✅ Good - Pure widget with parameters
+class StatisticsWidget extends StatelessWidget {
+  final Map<String, dynamic> statistics;
+  final bool isLoading;
+  
+  const StatisticsWidget({
+    super.key,
+    required this.statistics,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OsmeaComponents.container(
+      // UI implementation only
+    );
+  }
+}
+```
+
+#### 2. **Parameter-Based Data**
+```dart
+// ✅ Good - Data passed as parameters
+class RecentLessonsWidget extends StatelessWidget {
+  final List<LessonNote> recentLessons;
+  final VoidCallback? onLessonTap;
+  
+  const RecentLessonsWidget({
+    super.key,
+    required this.recentLessons,
+    this.onLessonTap,
+  });
+}
+```
+
+#### 3. **Callback Functions**
+```dart
+// ✅ Good - Callbacks for user interactions
+class QuickActionsWidget extends StatelessWidget {
+  final VoidCallback? onUploadDocuments;
+  final VoidCallback? onViewLessons;
+  
+  const QuickActionsWidget({
+    super.key,
+    this.onUploadDocuments,
+    this.onViewLessons,
+  });
+}
+```
+
+### ❌ DON'T - Widget Anti-Patterns
+
+#### 1. **No State Management in Widgets**
+```dart
+// ❌ Bad - State management in widget
+class StatisticsWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeViewModel, HomeState>(
+      builder: (context, state) {
+        // State management logic here - WRONG!
+        if (state is HomeLoadedState) {
+          return _buildStatistics(state.statistics);
+        }
+        return _buildLoading();
+      },
+    );
+  }
+}
+```
+
+#### 2. **No Direct Navigation in Widgets**
+```dart
+// ❌ Bad - Direct navigation in widget
+class QuickActionsWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return OsmeaComponents.button(
+      text: 'Upload Documents',
+      onPressed: () => context.go('/upload'), // WRONG!
+    );
+  }
+}
+
+// ✅ Good - Callback-based navigation
+class QuickActionsWidget extends StatelessWidget {
+  final VoidCallback? onUploadDocuments;
+  
+  const QuickActionsWidget({
+    super.key,
+    this.onUploadDocuments,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return OsmeaComponents.button(
+      text: 'Upload Documents',
+      onPressed: onUploadDocuments, // RIGHT!
+    );
+  }
+}
+```
+
+#### 3. **No Business Logic in Widgets**
+```dart
+// ❌ Bad - Business logic in widget
+class StatisticsWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final stats = _calculateStatistics(); // WRONG!
+    return _buildStats(stats);
+  }
+  
+  Map<String, dynamic> _calculateStatistics() {
+    // Business logic here - WRONG!
+  }
+}
+```
+
+## 🏗️ View-Widget Integration
+
+### View Responsibilities
+```dart
+// ✅ Good - View handles state and data flow
+class HomeView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => HomeViewModel()..add(HomeInitialEvent(context)),
+      child: BlocBuilder<HomeViewModel, HomeState>(
+        builder: (context, state) {
+          return OsmeaComponents.scaffold(
+            body: OsmeaComponents.column(
+              children: [
+                // State control in view
+                if (state is HomeLoadedState)
+                  StatisticsWidget(statistics: state.statistics)
+                else
+                  _buildLoadingState(),
+                
+                // Data passed as parameters
+                RecentLessonsWidget(
+                  recentLessons: state.recentLessons ?? [],
+                  onLessonTap: (lesson) => _navigateToLesson(lesson),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+### Widget Responsibilities
+```dart
+// ✅ Good - Widget focuses on UI only
+class RecentLessonsWidget extends StatelessWidget {
+  final List<LessonNote> recentLessons;
+  final Function(LessonNote)? onLessonTap;
+  
+  const RecentLessonsWidget({
+    super.key,
+    required this.recentLessons,
+    this.onLessonTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OsmeaComponents.container(
+      child: OsmeaComponents.column(
+        children: recentLessons.map((lesson) => 
+          _buildLessonCard(context, lesson)
+        ).toList(),
+      ),
+    );
+  }
+}
+```
+
+## 🎨 UI Component Rules
+
+### 1. **Use OsmeaComponents**
+```dart
+// ✅ Good - Use OsmeaComponents
+OsmeaComponents.text(
+  'Title',
+  textStyle: OsmeaTextStyle.headlineLarge(context),
+  color: OsmeaColors.white,
+  textAlign: context.textCenter,
+)
+
+// ❌ Bad - Use standard Flutter widgets
+Text(
+  'Title',
+  style: TextStyle(fontSize: 24),
+)
+```
+
+### 2. **Use Sizer Extensions**
+```dart
+// ✅ Good - Use sizer extensions
+OsmeaComponents.sizedBox(height: context.spacingNormal)
+OsmeaComponents.container(
+  padding: context.paddingHigh,
+  decoration: BoxDecoration(
+    borderRadius: context.borderRadiusHigh,
+  ),
+)
+
+// ❌ Bad - Hard-coded values
+SizedBox(height: 20)
+Container(
+  padding: EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(20),
+  ),
+)
+```
+
+## 📋 Widget Checklist
+
+### Before Creating a Widget
+- [ ] Is this a pure UI component?
+- [ ] Does it receive all data via parameters?
+- [ ] Does it use callbacks for user interactions?
+- [ ] Does it use OsmeaComponents?
+- [ ] Does it use sizer extensions?
+- [ ] Is it reusable across different views?
+
+### Before Adding to View
+- [ ] Is state management handled in the view?
+- [ ] Are data and callbacks passed as parameters?
+- [ ] Is the widget properly imported?
+- [ ] Are all required parameters provided?
+
+## 🔄 Migration Guide
+
+### From Stateful Widgets to Pure Widgets
+1. Remove all state management logic
+2. Convert state variables to parameters
+3. Move state control to parent view
+4. Use callbacks for user interactions
+5. Test widget with different data scenarios
+
+### Example Migration
+```dart
+// Before - Stateful widget
+class StatisticsWidget extends StatefulWidget {
+  @override
+  _StatisticsWidgetState createState() => _StatisticsWidgetState();
+}
+
+class _StatisticsWidgetState extends State<StatisticsWidget> {
+  Map<String, dynamic>? statistics;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadStatistics(); // WRONG!
+  }
+  
+  void _loadStatistics() {
+    // State management logic - WRONG!
+  }
+}
+
+// After - Pure widget
+class StatisticsWidget extends StatelessWidget {
+  final Map<String, dynamic> statistics;
+  
+  const StatisticsWidget({
+    super.key,
+    required this.statistics,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    // Pure UI implementation
+  }
+}
+```
+
+## 🎯 Benefits
+
+### 1. **Maintainability**
+- Clear separation of concerns
+- Easy to test individual components
+- Predictable data flow
+
+### 2. **Reusability**
+- Widgets can be used in different views
+- No coupling to specific state management
+- Easy to modify without affecting other parts
+
+### 3. **Performance**
+- No unnecessary rebuilds
+- Efficient state management
+- Better memory usage
+
+### 4. **Code Quality**
+- Cleaner, more readable code
+- Easier debugging
+- Better test coverage
+
+## 📚 Examples
+
+### Complete Widget Example
+```dart
+import 'package:flutter/material.dart';
+import 'package:osmea_components/osmea_components.dart';
+
+class UserProfileWidget extends StatelessWidget {
+  final String userName;
+  final String userEmail;
+  final String? userAvatar;
+  final VoidCallback? onEditProfile;
+  final VoidCallback? onLogout;
+  
+  const UserProfileWidget({
+    super.key,
+    required this.userName,
+    required this.userEmail,
+    this.userAvatar,
+    this.onEditProfile,
+    this.onLogout,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OsmeaComponents.container(
+      padding: context.paddingHigh,
+      decoration: BoxDecoration(
+        color: OsmeaColors.white.withValues(alpha: 0.1),
+        borderRadius: context.borderRadiusHigh,
+        border: Border.all(
+          color: OsmeaColors.white.withValues(alpha: 0.3),
+          width: context.borderWidth,
+        ),
+      ),
+      child: OsmeaComponents.column(
+        children: [
+          // User avatar
+          OsmeaComponents.container(
+            width: context.width80,
+            height: context.height80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: OsmeaColors.white.withValues(alpha: 0.2),
+            ),
+            child: userAvatar != null
+                ? OsmeaComponents.image(
+                    imagePath: userAvatar!,
+                    fit: BoxFit.cover,
+                  )
+                : Icon(
+                    Icons.person,
+                    size: context.iconSizeHigh,
+                    color: OsmeaColors.white,
+                  ),
+          ),
+          
+          OsmeaComponents.sizedBox(height: context.spacingNormal),
+          
+          // User name
+          OsmeaComponents.text(
+            userName,
+            textStyle: OsmeaTextStyle.headlineSmall(context),
+            color: OsmeaColors.white,
+            textAlign: context.textCenter,
+          ),
+          
+          OsmeaComponents.sizedBox(height: context.spacingLow),
+          
+          // User email
+          OsmeaComponents.text(
+            userEmail,
+            textStyle: OsmeaTextStyle.bodyMedium(context),
+            color: OsmeaColors.white.withValues(alpha: 0.7),
+            textAlign: context.textCenter,
+          ),
+          
+          OsmeaComponents.sizedBox(height: context.spacingNormal),
+          
+          // Action buttons
+          OsmeaComponents.row(
+            children: [
+              OsmeaComponents.expanded(
+                child: OsmeaComponents.button(
+                  text: 'Edit Profile',
+                  onPressed: onEditProfile,
+                  textColor: OsmeaColors.white,
+                  backgroundColor: OsmeaColors.white.withValues(alpha: 0.2),
+                ),
+              ),
+              OsmeaComponents.sizedBox(width: context.spacingLow),
+              OsmeaComponents.expanded(
+                child: OsmeaComponents.button(
+                  text: 'Logout',
+                  onPressed: onLogout,
+                  textColor: OsmeaColors.white,
+                  backgroundColor: OsmeaColors.red.withValues(alpha: 0.2),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+This architecture ensures clean, maintainable, and reusable widgets that follow Flutter best practices and the project's design system.
