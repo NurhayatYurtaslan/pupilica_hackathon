@@ -23,7 +23,7 @@ class LessonListView extends StatelessWidget {
       },
       child: BlocBuilder<LessonListViewModel, LessonListState>(
         builder: (context, state) {
-          return Scaffold(
+          return OsmeaComponents.scaffold(
             appBar: AppBar(
               backgroundColor: const Color(0xFF059669).withValues(alpha: 0.9),
               elevation: 0,
@@ -31,13 +31,11 @@ class LessonListView extends StatelessWidget {
                 onPressed: () => context.go(AppRouter.home),
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-              title: const Text(
+              title: OsmeaComponents.text(
                 'My Lessons',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                fontSize: context.fontSizeLarge,
+                fontWeight: context.bold,
+                color: Colors.white,
               ),
               centerTitle: true,
               actions: [
@@ -47,7 +45,7 @@ class LessonListView extends StatelessWidget {
                 ),
               ],
             ),
-            body: Container(
+            body: OsmeaComponents.container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -83,10 +81,11 @@ class LessonListView extends StatelessWidget {
           children: [
             const Icon(Icons.error, color: Colors.white, size: 64),
             const SizedBox(height: 16),
-            Text(
+            OsmeaComponents.text(
               'Error: ${state.error}',
-              style: const TextStyle(color: Colors.white),
-              textAlign: TextAlign.center,
+              fontSize: context.fontSizeMedium,
+              color: Colors.white,
+              textAlign: context.textCenter,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -95,6 +94,10 @@ class LessonListView extends StatelessWidget {
                   LessonListRefreshEvent(context),
                 );
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Retry'),
             ),
           ],
@@ -126,38 +129,28 @@ class LessonListView extends StatelessWidget {
             size: 80,
           ),
           const SizedBox(height: 20),
-          const Text(
+          OsmeaComponents.text(
             'No lessons yet',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            fontSize: context.fontSizeExtraLarge,
+            fontWeight: context.bold,
+            color: Colors.white,
           ),
           const SizedBox(height: 10),
-          const Text(
+          OsmeaComponents.text(
             'Upload your first document to get started',
-            style: TextStyle(fontSize: 16, color: Colors.white70),
-            textAlign: TextAlign.center,
+            fontSize: context.fontSizeMedium,
+            color: Colors.white70,
+            textAlign: context.textCenter,
           ),
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () => context.go(AppRouter.documentUpload),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
             ),
-            child: const Text(
-              'Upload Documents',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: const Text('Upload Documents'),
           ),
         ],
       ),
@@ -197,26 +190,26 @@ class LessonListView extends StatelessWidget {
           ),
           child: const Icon(Icons.school, color: Colors.white, size: 24),
         ),
-        title: Text(
+        title: OsmeaComponents.text(
           lesson.title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          fontSize: context.fontSizeLarge,
+          fontWeight: context.bold,
+          color: Colors.white,
         ),
-        subtitle: Column(
+        subtitle: OsmeaComponents.column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 4),
-            Text(
+            OsmeaComponents.sizedBox(height: context.height4),
+            OsmeaComponents.text(
               lesson.subject,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              fontSize: context.fontSizeSmall,
+              color: Colors.white70,
             ),
-            const SizedBox(height: 4),
-            Text(
+            OsmeaComponents.sizedBox(height: context.height4),
+            OsmeaComponents.text(
               '${lesson.documents.length} documents • ${lesson.isProcessed ? 'Processed' : 'Processing...'}',
-              style: const TextStyle(color: Colors.white60, fontSize: 12),
+              fontSize: context.fontSizeSmall,
+              color: Colors.white60,
             ),
           ],
         ),
