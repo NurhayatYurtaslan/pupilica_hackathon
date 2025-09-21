@@ -6,29 +6,29 @@ class OnboardingConstants {
   static final List<OnboardingPage> pages = [
     OnboardingPage(
       icon: Icons.psychology_alt,
-      title: 'Welcome to Pupilica AI',
+      title: 'Welcome to RocketLica',
       description:
-          'Transform your learning experience with our AI-powered education platform.',
+          'Transform your documents into PDFs with our AI-powered OCR technology.',
       color: OsmeaColors.nordicBlue,
     ),
     OnboardingPage(
       icon: Icons.upload_file,
       title: 'Upload Documents',
       description:
-          'Easily upload PDF, image, or text files and analyze them with AI.',
+          'Easily upload images or PDF files and extract text using advanced OCR.',
       color: OsmeaColors.nordicBlue,
     ),
     OnboardingPage(
-      icon: Icons.school,
-      title: 'Create Lessons',
+      icon: Icons.picture_as_pdf,
+      title: 'Generate PDFs',
       description:
-          'Automatically generate interactive lessons from your uploaded documents.',
+          'Convert your uploaded documents into professional PDFs with extracted text.',
       color: OsmeaColors.blue,
     ),
     OnboardingPage(
-      icon: Icons.quiz,
-      title: 'Test Your Knowledge',
-      description: 'Test what you\'ve learned and reinforce your knowledge.',
+      icon: Icons.download,
+      title: 'Download & Share',
+      description: 'Download your generated PDFs and share them with others.',
       color: OsmeaColors.nordicBlue,
     ),
   ];
