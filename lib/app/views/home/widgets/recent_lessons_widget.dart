@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:osmea_components/osmea_components.dart';
 
 class RecentLessonsWidget extends StatelessWidget {
   final List<dynamic> recentLessons;
@@ -8,26 +7,29 @@ class RecentLessonsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OsmeaComponents.container(
+    return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: OsmeaColors.white.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: OsmeaColors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
-      child: OsmeaComponents.column(
+      child: Column(
         children: [
-          OsmeaComponents.text(
+          const Text(
             'Recent Lessons',
-            textStyle: OsmeaTextStyle.headlineSmall(context),
-            color: OsmeaColors.white,
-            textAlign: context.textCenter,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
           ),
-          OsmeaComponents.sizedBox(height: 20),
-          OsmeaComponents.column(
+          const SizedBox(height: 20),
+          Column(
             children: recentLessons
                 .take(5)
                 .map((lesson) => _buildLessonCard(context, lesson))
@@ -39,47 +41,51 @@ class RecentLessonsWidget extends StatelessWidget {
   }
 
   Widget _buildLessonCard(BuildContext context, dynamic lesson) {
-    return OsmeaComponents.container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: OsmeaColors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: OsmeaColors.white.withValues(alpha: 0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
-      child: OsmeaComponents.row(
+      child: Row(
         children: [
           Icon(
             Icons.school,
-            size: 28,
-            color: OsmeaColors.white.withValues(alpha: 0.9),
+            size: 24,
+            color: Colors.white.withValues(alpha: 0.8),
           ),
-          OsmeaComponents.sizedBox(width: 16),
-          OsmeaComponents.expanded(
-            child: OsmeaComponents.column(
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                OsmeaComponents.text(
+                Text(
                   lesson.title ?? 'Untitled Lesson',
-                  textStyle: OsmeaTextStyle.bodyLarge(context),
-                  color: OsmeaColors.white,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                OsmeaComponents.sizedBox(height: 4),
-                OsmeaComponents.text(
+                Text(
                   lesson.subject ?? 'No subject',
-                  textStyle: OsmeaTextStyle.bodySmall(context),
-                  color: OsmeaColors.white.withValues(alpha: 0.7),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
           ),
           Icon(
             Icons.arrow_forward_ios,
-            size: 18,
-            color: OsmeaColors.white.withValues(alpha: 0.6),
+            size: 16,
+            color: Colors.white.withValues(alpha: 0.5),
           ),
         ],
       ),

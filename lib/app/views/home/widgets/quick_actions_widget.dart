@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:osmea_components/osmea_components.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
 
 class QuickActionsWidget extends StatelessWidget {
@@ -8,74 +7,83 @@ class QuickActionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OsmeaComponents.container(
+    return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: OsmeaColors.white.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: OsmeaColors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
-      child: OsmeaComponents.column(
+      child: Column(
         children: [
-          OsmeaComponents.text(
+          const Text(
             'Quick Actions',
-            textStyle: OsmeaTextStyle.headlineSmall(context),
-            color: OsmeaColors.white,
-            textAlign: context.textCenter,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
           ),
-          OsmeaComponents.sizedBox(height: 20),
+          const SizedBox(height: 20),
 
           // Action buttons
-          OsmeaComponents.row(
+          Row(
             children: [
               // Upload Documents
-              OsmeaComponents.expanded(
-                child: OsmeaComponents.container(
+              Expanded(
+                child: Container(
                   margin: const EdgeInsets.only(right: 8),
                   child: ElevatedButton(
                     onPressed: () => context.go(AppRouter.documentUpload),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: OsmeaColors.white.withValues(alpha: 0.2),
-                      foregroundColor: OsmeaColors.white,
+                      backgroundColor: Colors.white.withValues(alpha: 0.2),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
-                    child: OsmeaComponents.text(
+                    child: const Text(
                       'Upload Documents',
-                      textStyle: OsmeaTextStyle.bodyMedium(context),
-                      color: OsmeaColors.white,
-                      textAlign: context.textCenter,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
               ),
 
               // My Lessons
-              OsmeaComponents.expanded(
-                child: OsmeaComponents.container(
+              Expanded(
+                child: Container(
                   margin: const EdgeInsets.only(left: 8),
                   child: ElevatedButton(
                     onPressed: () => context.go(AppRouter.lessonList),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: OsmeaColors.white.withValues(alpha: 0.2),
-                      foregroundColor: OsmeaColors.white,
+                      backgroundColor: Colors.white.withValues(alpha: 0.2),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
-                    child: OsmeaComponents.text(
+                    child: const Text(
                       'My Lessons',
-                      textStyle: OsmeaTextStyle.bodyMedium(context),
-                      color: OsmeaColors.white,
-                      textAlign: context.textCenter,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),

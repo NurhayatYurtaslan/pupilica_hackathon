@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:osmea_components/osmea_components.dart';
 
 class StatisticsWidget extends StatelessWidget {
   final Map<String, dynamic> statistics;
@@ -8,44 +7,46 @@ class StatisticsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OsmeaComponents.container(
+    return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: OsmeaColors.white.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: OsmeaColors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
-      child: OsmeaComponents.column(
+      child: Column(
         children: [
-          OsmeaComponents.text(
+          const Text(
             'Your Progress',
-            textStyle: OsmeaTextStyle.headlineSmall(context),
-            color: OsmeaColors.white,
-            textAlign: context.textCenter,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
           ),
-          OsmeaComponents.sizedBox(height: 20),
-
-          OsmeaComponents.row(
+          const SizedBox(height: 20),
+          Row(
             children: [
               _buildStatCard(
                 context,
                 'Total Lessons',
-                '${statistics['totalNotes'] ?? 0}',
+                '${statistics['totalNotes']}',
                 Icons.library_books,
               ),
               _buildStatCard(
                 context,
                 'Processed',
-                '${statistics['processedNotes'] ?? 0}',
+                '${statistics['processedNotes']}',
                 Icons.check_circle,
               ),
               _buildStatCard(
                 context,
                 'Documents',
-                '${statistics['totalDocuments'] ?? 0}',
+                '${statistics['totalDocuments']}',
                 Icons.description,
               ),
             ],
@@ -61,38 +62,39 @@ class StatisticsWidget extends StatelessWidget {
     String value,
     IconData icon,
   ) {
-    return OsmeaComponents.expanded(
-      child: OsmeaComponents.container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: OsmeaColors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: OsmeaColors.white.withValues(alpha: 0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
-        child: OsmeaComponents.column(
+        child: Column(
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: OsmeaColors.white.withValues(alpha: 0.9),
-            ),
-            OsmeaComponents.sizedBox(height: 12),
-            OsmeaComponents.text(
+            Icon(icon, size: 28, color: Colors.white.withValues(alpha: 0.8)),
+            const SizedBox(height: 8),
+            Text(
               value,
-              textStyle: OsmeaTextStyle.headlineSmall(context),
-              color: OsmeaColors.white,
-              textAlign: context.textCenter,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
-            OsmeaComponents.sizedBox(height: 8),
-            OsmeaComponents.text(
+            const SizedBox(height: 4),
+            Text(
               title,
-              textStyle: OsmeaTextStyle.bodySmall(context),
-              color: OsmeaColors.white.withValues(alpha: 0.8),
-              textAlign: context.textCenter,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
