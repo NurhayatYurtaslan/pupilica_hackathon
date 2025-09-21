@@ -48,15 +48,11 @@ class SplashView extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        width: 2,
-                      ),
                     ),
-                    child: const Icon(
-                      Icons.psychology_alt,
-                      size: 60,
-                      color: Colors.white,
+                    child: Image.asset(
+                      'assets/images/rocket-lica.png',
+                      height: 60,
+                      width: 60,
                     ),
                   ),
 
@@ -64,7 +60,7 @@ class SplashView extends StatelessWidget {
 
                   // App title
                   OsmeaComponents.text(
-                    'Pupilica AI',
+                    'RocketLica',
                     fontSize: context.fontSizeExtraLarge,
                     fontWeight: context.bold,
                     color: Colors.white,
