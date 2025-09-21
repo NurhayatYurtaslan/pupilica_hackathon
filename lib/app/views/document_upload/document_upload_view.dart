@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:osmea_components/osmea_components.dart';
 import 'package:pupilica_hackathon/core/helpers/logger.dart';
 import 'package:pupilica_hackathon/core/services/document_service.dart';
+import 'package:pupilica_hackathon/core/services/pdf_service.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/models/module/state.dart';
@@ -27,17 +28,28 @@ class DocumentUploadView extends StatelessWidget {
         builder: (context, state) {
           return OsmeaComponents.scaffold(
             appBar: AppBar(
-              backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
+              backgroundColor: const Color(0xFF38B6FF),
               elevation: 0,
               leading: IconButton(
                 onPressed: () => context.go(AppRouter.home),
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-              title: OsmeaComponents.text(
-                'Upload Documents',
-                fontSize: context.fontSizeLarge,
-                fontWeight: context.bold,
-                color: Colors.white,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+            Image.asset(
+              'assets/images/rocket-lica.png',
+              height: 28,
+              width: 28,
+            ),
+                  const SizedBox(width: 8),
+                  OsmeaComponents.text(
+                    'RocketLica',
+                    fontSize: context.fontSizeLarge,
+                    fontWeight: context.bold,
+                    color: Colors.white,
+                  ),
+                ],
               ),
               centerTitle: true,
             ),
@@ -203,11 +215,9 @@ class DocumentUploadView extends StatelessWidget {
                                 OsmeaComponents.sizedBox(
                                   height: context.height12,
                                 ),
-                                ...state.documents
-                                    .map(
-                                      (doc) => _buildDocumentItem(context, doc),
-                                    )
-                                    .toList(),
+                                ...state.documents.map(
+                                  (doc) => _buildDocumentItem(context, doc),
+                                ),
                               ],
                             ),
                           ),
@@ -218,8 +228,9 @@ class DocumentUploadView extends StatelessWidget {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () =>
-                                  _processDocuments(context, state.documents),
+                              onPressed: () {
+                                _processDocuments(context, state.documents);
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white.withValues(
                                   alpha: 0.3,
@@ -235,6 +246,124 @@ class DocumentUploadView extends StatelessWidget {
                                 elevation: 0,
                               ),
                               child: OsmeaComponents.text('Process Documents'),
+                            ),
+                          ),
+
+                        // Success state - show extracted text
+                        if (state is DocumentUploadSuccessState)
+                          OsmeaComponents.container(
+                            padding: EdgeInsets.all(context.spacing16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: context.borderWidth * 2,
+                              ),
+                            ),
+                            child: OsmeaComponents.column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OsmeaComponents.text(
+                                  'Extracted Text (${state.extractedText.length} characters)',
+                                  fontSize: context.fontSizeLarge,
+                                  fontWeight: context.semiBold,
+                                  color: Colors.white,
+                                ),
+                                OsmeaComponents.sizedBox(
+                                  height: context.height12,
+                                ),
+                                OsmeaComponents.container(
+                                  padding: EdgeInsets.all(context.spacing12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: OsmeaComponents.text(
+                                    state.extractedText,
+                                    fontSize: context.fontSizeSmall,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                OsmeaComponents.sizedBox(
+                                  height: context.height16,
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () => _showPDFPreview(context, state),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 20,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: OsmeaComponents.text(
+                                      'Preview PDF',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        // Debug info
+                        if (state is DocumentUploadLoadedState ||
+                            state is DocumentUploadSuccessState)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(top: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OsmeaComponents.text(
+                                  'DEBUG INFO:',
+                                  color: Colors.white,
+                                  fontWeight: context.bold,
+                                ),
+                                OsmeaComponents.sizedBox(height: 8),
+                                OsmeaComponents.text(
+                                  'State: ${state.runtimeType}',
+                                  color: Colors.white,
+                                  fontSize: context.fontSizeSmall,
+                                ),
+                                if (state is DocumentUploadLoadedState) ...[
+                                  OsmeaComponents.text(
+                                    'Documents count: ${state.documents.length}',
+                                    color: Colors.white,
+                                    fontSize: context.fontSizeSmall,
+                                  ),
+                                  OsmeaComponents.text(
+                                    'Is processing: ${state.isProcessing}',
+                                    color: Colors.white,
+                                    fontSize: context.fontSizeSmall,
+                                  ),
+                                ],
+                                if (state is DocumentUploadSuccessState) ...[
+                                  OsmeaComponents.text(
+                                    'Documents count: ${state.documents.length}',
+                                    color: Colors.white,
+                                    fontSize: context.fontSizeSmall,
+                                  ),
+                                  OsmeaComponents.text(
+                                    'Text length: ${state.extractedText.length}',
+                                    color: Colors.white,
+                                    fontSize: context.fontSizeSmall,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                       ],
@@ -475,6 +604,7 @@ class DocumentUploadView extends StatelessWidget {
 
       // Check if processing was successful
       final currentState = context.read<DocumentUploadViewModel>().state;
+
       if (currentState is DocumentUploadSuccessState) {
         Logger.success(
           'Documents processed successfully',
@@ -530,6 +660,154 @@ class DocumentUploadView extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to process documents: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showPDFPreview(BuildContext context, DocumentUploadSuccessState state) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Creating PDF preview...',
+                  color: Colors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Create PDF
+      final pdfBytes = await PDFService.createPDF(
+        title: 'Document ${DateTime.now().millisecondsSinceEpoch}',
+        subject: 'General',
+        extractedText: state.extractedText,
+      );
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show PDF preview dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: OsmeaComponents.text(
+                'PDF Preview',
+                fontSize: context.fontSizeLarge,
+                fontWeight: context.bold,
+                color: Colors.white,
+                textAlign: context.textCenter,
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    OsmeaComponents.text(
+                      'PDF created successfully!',
+                      fontSize: context.fontSizeMedium,
+                      color: Colors.white,
+                      textAlign: context.textCenter,
+                    ),
+                    const SizedBox(height: 16),
+                    OsmeaComponents.text(
+                      'Size: ${(pdfBytes.length / 1024).toStringAsFixed(1)} KB',
+                      fontSize: context.fontSizeSmall,
+                      color: Colors.white70,
+                      textAlign: context.textCenter,
+                    ),
+                    const SizedBox(height: 20),
+                    OsmeaComponents.text(
+                      'Extracted Text Preview:',
+                      fontSize: context.fontSizeMedium,
+                      fontWeight: context.semiBold,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: SingleChildScrollView(
+                          child: OsmeaComponents.text(
+                            state.extractedText.length > 200 
+                                ? '${state.extractedText.substring(0, 200)}...'
+                                : state.extractedText,
+                            fontSize: context.fontSizeSmall,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: OsmeaComponents.text(
+                    'Close',
+                    color: Colors.white,
+                    fontWeight: context.semiBold,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await PDFService.sharePDF(
+                      title: 'Document ${DateTime.now().millisecondsSinceEpoch}',
+                      subject: 'General',
+                      extractedText: state.extractedText,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.withValues(alpha: 0.8),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: OsmeaComponents.text('Download PDF'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create PDF preview: $e'),
             backgroundColor: Colors.red,
           ),
         );

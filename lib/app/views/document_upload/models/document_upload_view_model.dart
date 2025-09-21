@@ -146,9 +146,8 @@ class DocumentUploadViewModel
       add(const DocumentUploadProcessingStartedEvent());
 
       Logger.info(
-        'Starting OCR processing',
+        'OCR işlemi başlatılıyor - ${documents.length} dosya',
         category: LogCategory.ocr,
-        data: {'documentCount': documents.length},
       );
 
       String extractedText = '';
