@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/state.dart';
 import 'package:pupilica_hackathon/core/helpers/logger.dart';
+import 'package:pupilica_hackathon/core/helpers/local_storage_helper.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
 
 class SplashViewModel extends Bloc<SplashEvent, SplashState> {
@@ -27,10 +28,35 @@ class SplashViewModel extends Bloc<SplashEvent, SplashState> {
       category: LogCategory.splash,
     );
 
-    // Navigate to home after splash
+    // Check onboarding status and navigate accordingly
     if (event.context.mounted) {
-      Logger.info('Navigating to home', category: LogCategory.splash);
-      event.context.go(AppRouter.home);
+      try {
+        final isOnboardingCompleted = LocalStorageHelper.getBoolOrDefault(
+          'onboarding_completed',
+          false,
+        );
+
+        if (isOnboardingCompleted) {
+          Logger.info(
+            'Onboarding completed, navigating to home',
+            category: LogCategory.splash,
+          );
+          event.context.go(AppRouter.home);
+        } else {
+          Logger.info(
+            'First time user, navigating to onboarding',
+            category: LogCategory.splash,
+          );
+          event.context.go(AppRouter.onboarding);
+        }
+      } catch (e) {
+        Logger.error(
+          'Error checking onboarding status: $e',
+          category: LogCategory.splash,
+        );
+        // Fallback to onboarding if there's an error
+        event.context.go(AppRouter.onboarding);
+      }
     } else {
       Logger.error(
         'Context not mounted, cannot navigate',

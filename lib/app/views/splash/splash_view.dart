@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:osmea_components/osmea_components.dart';
-import 'package:pupilica_hackathon/app/routes/app_router.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/module/state.dart';
 import 'package:pupilica_hackathon/app/views/splash/models/splash_view_model.dart';
@@ -22,13 +20,6 @@ class SplashView extends StatelessWidget {
       },
       child: BlocBuilder<SplashViewModel, SplashState>(
         builder: (context, state) {
-          // Auto navigation after 2 seconds
-          Future.delayed(const Duration(seconds: 2), () {
-            if (context.mounted) {
-              context.go(AppRouter.home);
-            }
-          });
-
           return OsmeaComponents.scaffold(
             body: OsmeaComponents.container(
               width: context.allWidth,
