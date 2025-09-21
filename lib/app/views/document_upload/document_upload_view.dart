@@ -27,44 +27,18 @@ class DocumentUploadView extends StatelessWidget {
       child: BlocBuilder<DocumentUploadViewModel, DocumentUploadState>(
         builder: (context, state) {
           return OsmeaComponents.scaffold(
-            appBar: AppBar(
-              backgroundColor: const Color(0xFF38B6FF),
-              elevation: 0,
-              leading: IconButton(
-                onPressed: () => context.go(AppRouter.home),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-              ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-            Image.asset(
-              'assets/images/rocket-lica.png',
-              height: 28,
-              width: 28,
-            ),
-                  const SizedBox(width: 8),
-                  OsmeaComponents.text(
-                    'RocketLica',
-                    fontSize: context.fontSizeLarge,
-                    fontWeight: context.bold,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              centerTitle: true,
-            ),
-            body: OsmeaComponents.container(
+            backgroundColor: OsmeaColors.nordicBlue,
+            body: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF7C3AED), // Purple
-                    const Color(0xFF8B5CF6), // Light purple
-                    const Color(0xFFA78BFA), // Very light purple
-                    const Color(0xFFC4B5FD), // Lavender
+                    OsmeaColors.nordicBlue,
+                    OsmeaColors.blue,
+                    OsmeaColors.nordicBlue,
                   ],
-                  stops: const [0.0, 0.3, 0.7, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
               child: SafeArea(
@@ -73,40 +47,26 @@ class DocumentUploadView extends StatelessWidget {
                     padding: EdgeInsets.all(context.spacing20),
                     child: OsmeaComponents.column(
                       children: [
+                        // Header
+                        _buildHeader(context),
+
+                        OsmeaComponents.sizedBox(height: context.height40),
+
                         // Upload buttons
                         OsmeaComponents.container(
                           padding: EdgeInsets.all(context.spacing20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              width: context.borderWidth * 2,
-                            ),
                           ),
                           child: OsmeaComponents.column(
                             children: [
                               // Pick files button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () => _pickDocuments(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: OsmeaComponents.text('Pick Documents'),
-                                ),
+                              _buildActionButton(
+                                context,
+                                'Pick Documents',
+                                Icons.upload_file,
+                                () => _pickDocuments(context),
                               ),
 
                               OsmeaComponents.sizedBox(
@@ -114,26 +74,11 @@ class DocumentUploadView extends StatelessWidget {
                               ),
 
                               // Take photo button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () => _takePhoto(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: OsmeaComponents.text('Take Photo'),
-                                ),
+                              _buildActionButton(
+                                context,
+                                'Take Photo',
+                                Icons.camera_alt,
+                                () => _takePhoto(context),
                               ),
 
                               OsmeaComponents.sizedBox(
@@ -141,29 +86,11 @@ class DocumentUploadView extends StatelessWidget {
                               ),
 
                               // Pick from gallery button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () =>
-                                      _pickImageFromGallery(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: OsmeaComponents.text(
-                                    'Pick from Gallery',
-                                  ),
-                                ),
+                              _buildActionButton(
+                                context,
+                                'Pick from Gallery',
+                                Icons.photo_library,
+                                () => _pickImageFromGallery(context),
                               ),
 
                               OsmeaComponents.sizedBox(
@@ -291,7 +218,8 @@ class DocumentUploadView extends StatelessWidget {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: () => _showPDFPreview(context, state),
+                                    onPressed: () =>
+                                        _showPDFPreview(context, state),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.orange.withValues(
                                         alpha: 0.8,
@@ -306,9 +234,7 @@ class DocumentUploadView extends StatelessWidget {
                                       ),
                                       elevation: 0,
                                     ),
-                                    child: OsmeaComponents.text(
-                                      'Preview PDF',
-                                    ),
+                                    child: OsmeaComponents.text('Preview PDF'),
                                   ),
                                 ),
                               ],
@@ -374,6 +300,75 @@ class DocumentUploadView extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return OsmeaComponents.column(
+      children: [
+        OsmeaComponents.sizedBox(height: context.height20),
+        Image.asset('assets/images/rocket-lica.png', height: 60, width: 60),
+        OsmeaComponents.sizedBox(height: context.height16),
+        OsmeaComponents.text(
+          'Upload Documents',
+          fontSize: context.fontSizeExtraLarge,
+          fontWeight: context.extraBold,
+          letterSpacing: context.letterSpacingWide,
+          color: Colors.white,
+        ),
+        OsmeaComponents.sizedBox(height: context.height8),
+        OsmeaComponents.text(
+          'Upload images or PDFs to extract text',
+          fontSize: context.fontSizeMedium,
+          fontWeight: context.light,
+          color: Colors.white.withValues(alpha: 0.8),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: OsmeaComponents.row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(icon, size: 24, color: Colors.white),
+            const SizedBox(width: 12),
+            OsmeaComponents.text(
+              title,
+              fontSize: context.fontSizeMedium,
+              fontWeight: context.medium,
+              color: Colors.white,
+            ),
+            const Spacer(),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.white70,
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
       ),
     );
   }
@@ -667,7 +662,10 @@ class DocumentUploadView extends StatelessWidget {
     }
   }
 
-  void _showPDFPreview(BuildContext context, DocumentUploadSuccessState state) async {
+  void _showPDFPreview(
+    BuildContext context,
+    DocumentUploadSuccessState state,
+  ) async {
     try {
       // Show loading indicator
       showDialog(
@@ -707,7 +705,7 @@ class DocumentUploadView extends StatelessWidget {
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         // Show PDF preview dialog
         showDialog(
           context: context,
@@ -759,7 +757,7 @@ class DocumentUploadView extends StatelessWidget {
                         ),
                         child: SingleChildScrollView(
                           child: OsmeaComponents.text(
-                            state.extractedText.length > 200 
+                            state.extractedText.length > 200
                                 ? '${state.extractedText.substring(0, 200)}...'
                                 : state.extractedText,
                             fontSize: context.fontSizeSmall,
@@ -784,7 +782,8 @@ class DocumentUploadView extends StatelessWidget {
                   onPressed: () async {
                     Navigator.of(context).pop();
                     await PDFService.sharePDF(
-                      title: 'Document ${DateTime.now().millisecondsSinceEpoch}',
+                      title:
+                          'Document ${DateTime.now().millisecondsSinceEpoch}',
                       subject: 'General',
                       extractedText: state.extractedText,
                     );
@@ -804,7 +803,7 @@ class DocumentUploadView extends StatelessWidget {
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to create PDF preview: $e'),
