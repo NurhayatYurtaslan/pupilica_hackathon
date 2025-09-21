@@ -30,6 +30,7 @@ dependencies:
   # State Management
   flutter_bloc: ^9.1.1
   bloc: ^9.0.0
+  equatable: ^2.0.5
 
   # Dependency Injection
   get_it: ^8.2.0
@@ -44,6 +45,23 @@ dependencies:
 
   # OCR & Image Processing
   flutter_tesseract_ocr: ^0.4.29
+  
+  # File Picker & Document Handling
+  file_picker: ^8.0.0+1
+  image_picker: ^1.0.7
+  
+  # PDF Processing
+  pdf: ^3.10.7
+  pdf_text: ^0.5.0
+  
+  # Image Processing
+  image: ^4.1.7
+  
+  # File Handling
+  mime: ^1.0.5
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
