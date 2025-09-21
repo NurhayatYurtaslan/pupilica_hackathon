@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:device_frame/device_frame.dart';
 import 'package:osmea_components/osmea_components.dart';
-import 'package:pupilica_hackathon/app/views/splash/splash_view.dart';
+import 'package:pupilica_hackathon/app/routes/app_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,13 +13,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final app = MaterialApp(
+    final app = MaterialApp.router(
       title: 'Pupilica AI Hackathon',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: OsmeaColors.nordicBlue),
         useMaterial3: true,
       ),
-      home: const SplashView(),
+      routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );
 
