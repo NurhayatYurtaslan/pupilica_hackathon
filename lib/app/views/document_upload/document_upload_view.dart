@@ -442,15 +442,82 @@ class DocumentUploadView extends StatelessWidget {
   ) async {
     try {
       Logger.info(
-        'Starting document processing',
+        'Starting document processing with OCR',
         category: LogCategory.document,
         data: {'count': documents.length},
       );
 
-      // Navigate to lesson creation or processing screen
-      // This would typically navigate to a form where user can enter lesson details
+      // Show loading indicator
       if (context.mounted) {
-        context.go(AppRouter.lessonCreation, extra: documents);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text('Processing documents with OCR...'),
+              ],
+            ),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      // Process documents with OCR using the ViewModel
+      await context.read<DocumentUploadViewModel>().processDocuments(documents);
+
+      // Check if processing was successful
+      final currentState = context.read<DocumentUploadViewModel>().state;
+      if (currentState is DocumentUploadSuccessState) {
+        Logger.success(
+          'Documents processed successfully',
+          category: LogCategory.document,
+          data: {'textLength': currentState.extractedText.length},
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Successfully processed ${documents.length} document(s)',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Navigate to lesson creation with extracted text
+          context.go(
+            AppRouter.lessonCreation,
+            extra: {
+              'documents': documents,
+              'extractedText': currentState.extractedText,
+            },
+          );
+        }
+      } else if (currentState is DocumentUploadErrorState) {
+        Logger.error(
+          'Document processing failed',
+          category: LogCategory.document,
+          data: {'error': currentState.error},
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Failed to process documents: ${currentState.error}',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       Logger.error(
@@ -461,7 +528,10 @@ class DocumentUploadView extends StatelessWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to process documents: $e')),
+          SnackBar(
+            content: Text('Failed to process documents: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
