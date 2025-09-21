@@ -3,8 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:device_frame/device_frame.dart';
 import 'package:osmea_components/osmea_components.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
+import 'package:pupilica_hackathon/core/helpers/local_storage_helper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize LocalStorageHelper
+  await LocalStorageHelper.initialize();
+
   runApp(const MyApp());
 }
 
