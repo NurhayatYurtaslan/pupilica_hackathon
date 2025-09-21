@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pupilica_hackathon/core/helpers/logger.dart';
+import 'package:pupilica_hackathon/core/models/lesson_note.dart';
 
 /// Local storage helper using SharedPreferences
 class LocalStorageHelper {
@@ -494,6 +495,212 @@ class LocalStorageHelper {
         data: {'error': e.toString()},
       );
       return {'totalKeys': 0, 'estimatedSize': 0, 'estimatedSizeKB': '0.00'};
+    }
+  }
+
+  // Lesson Note operations
+  /// Save lesson note
+  static Future<bool> saveLessonNote(LessonNote lessonNote) async {
+    try {
+      final lessonJson = lessonNote.toJson();
+      final result = await saveJson('lesson_${lessonNote.id}', lessonJson);
+
+      if (result) {
+        // Add to lessons list
+        final lessons = getLessonNotes();
+        final existingIndex = lessons.indexWhere(
+          (lesson) => lesson.id == lessonNote.id,
+        );
+
+        if (existingIndex >= 0) {
+          lessons[existingIndex] = lessonNote;
+        } else {
+          lessons.add(lessonNote);
+        }
+
+        await saveJsonList(
+          'lessons',
+          lessons.map((lesson) => lesson.toJson()).toList(),
+        );
+
+        Logger.success(
+          'Lesson note saved',
+          category: LogCategory.database,
+          data: {'lessonId': lessonNote.id, 'title': lessonNote.title},
+        );
+      }
+
+      return result;
+    } catch (e) {
+      Logger.error(
+        'Failed to save lesson note',
+        category: LogCategory.database,
+        data: {'lessonId': lessonNote.id, 'error': e.toString()},
+      );
+      return false;
+    }
+  }
+
+  /// Get lesson note by ID
+  static LessonNote? getLessonNote(String lessonId) {
+    try {
+      final lessonJson = getJson('lesson_$lessonId');
+      if (lessonJson == null) return null;
+
+      final lesson = LessonNote.fromJson(lessonJson);
+      Logger.debug(
+        'Lesson note retrieved',
+        category: LogCategory.database,
+        data: {'lessonId': lessonId, 'title': lesson.title},
+      );
+      return lesson;
+    } catch (e) {
+      Logger.error(
+        'Failed to get lesson note',
+        category: LogCategory.database,
+        data: {'lessonId': lessonId, 'error': e.toString()},
+      );
+      return null;
+    }
+  }
+
+  /// Get all lesson notes
+  static List<LessonNote> getLessonNotes() {
+    try {
+      final lessonsJson = getJsonList('lessons') ?? [];
+      final lessons = lessonsJson
+          .map((json) => LessonNote.fromJson(json))
+          .toList();
+
+      // Sort by creation date (newest first)
+      lessons.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      Logger.debug(
+        'All lesson notes retrieved',
+        category: LogCategory.database,
+        data: {'count': lessons.length},
+      );
+      return lessons;
+    } catch (e) {
+      Logger.error(
+        'Failed to get lesson notes',
+        category: LogCategory.database,
+        data: {'error': e.toString()},
+      );
+      return [];
+    }
+  }
+
+  /// Delete lesson note
+  static Future<bool> deleteLessonNote(String lessonId) async {
+    try {
+      // Remove from individual storage
+      final result = await remove('lesson_$lessonId');
+
+      if (result) {
+        // Remove from lessons list
+        final lessons = getLessonNotes();
+        lessons.removeWhere((lesson) => lesson.id == lessonId);
+        await saveJsonList(
+          'lessons',
+          lessons.map((lesson) => lesson.toJson()).toList(),
+        );
+
+        Logger.success(
+          'Lesson note deleted',
+          category: LogCategory.database,
+          data: {'lessonId': lessonId},
+        );
+      }
+
+      return result;
+    } catch (e) {
+      Logger.error(
+        'Failed to delete lesson note',
+        category: LogCategory.database,
+        data: {'lessonId': lessonId, 'error': e.toString()},
+      );
+      return false;
+    }
+  }
+
+  /// Update lesson note
+  static Future<bool> updateLessonNote(LessonNote lessonNote) async {
+    try {
+      final result = await saveLessonNote(lessonNote);
+
+      if (result) {
+        Logger.success(
+          'Lesson note updated',
+          category: LogCategory.database,
+          data: {'lessonId': lessonNote.id, 'title': lessonNote.title},
+        );
+      }
+
+      return result;
+    } catch (e) {
+      Logger.error(
+        'Failed to update lesson note',
+        category: LogCategory.database,
+        data: {'lessonId': lessonNote.id, 'error': e.toString()},
+      );
+      return false;
+    }
+  }
+
+  /// Get lesson notes by subject
+  static List<LessonNote> getLessonNotesBySubject(String subject) {
+    try {
+      final allLessons = getLessonNotes();
+      final filteredLessons = allLessons
+          .where(
+            (lesson) =>
+                lesson.subject.toLowerCase().contains(subject.toLowerCase()),
+          )
+          .toList();
+
+      Logger.debug(
+        'Lesson notes filtered by subject',
+        category: LogCategory.database,
+        data: {'subject': subject, 'count': filteredLessons.length},
+      );
+      return filteredLessons;
+    } catch (e) {
+      Logger.error(
+        'Failed to get lesson notes by subject',
+        category: LogCategory.database,
+        data: {'subject': subject, 'error': e.toString()},
+      );
+      return [];
+    }
+  }
+
+  /// Search lesson notes
+  static List<LessonNote> searchLessonNotes(String query) {
+    try {
+      final allLessons = getLessonNotes();
+      final searchQuery = query.toLowerCase();
+
+      final filteredLessons = allLessons.where((lesson) {
+        return lesson.title.toLowerCase().contains(searchQuery) ||
+            lesson.subject.toLowerCase().contains(searchQuery) ||
+            lesson.description.toLowerCase().contains(searchQuery) ||
+            lesson.extractedText.toLowerCase().contains(searchQuery);
+      }).toList();
+
+      Logger.debug(
+        'Lesson notes searched',
+        category: LogCategory.database,
+        data: {'query': query, 'count': filteredLessons.length},
+      );
+      return filteredLessons;
+    } catch (e) {
+      Logger.error(
+        'Failed to search lesson notes',
+        category: LogCategory.database,
+        data: {'query': query, 'error': e.toString()},
+      );
+      return [];
     }
   }
 }
