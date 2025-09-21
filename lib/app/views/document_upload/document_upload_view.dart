@@ -25,7 +25,7 @@ class DocumentUploadView extends StatelessWidget {
       },
       child: BlocBuilder<DocumentUploadViewModel, DocumentUploadState>(
         builder: (context, state) {
-          return Scaffold(
+          return OsmeaComponents.scaffold(
             appBar: AppBar(
               backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
               elevation: 0,
@@ -33,17 +33,15 @@ class DocumentUploadView extends StatelessWidget {
                 onPressed: () => context.go(AppRouter.home),
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-              title: const Text(
+              title: OsmeaComponents.text(
                 'Upload Documents',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                fontSize: context.fontSizeLarge,
+                fontWeight: context.bold,
+                color: Colors.white,
               ),
               centerTitle: true,
             ),
-            body: Container(
+            body: OsmeaComponents.container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -59,161 +57,33 @@ class DocumentUploadView extends StatelessWidget {
               ),
               child: SafeArea(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
+                  child: OsmeaComponents.padding(
+                    padding: EdgeInsets.all(context.spacing20),
+                    child: OsmeaComponents.column(
                       children: [
-                        // Content
-                        Column(
-                          children: [
-                            // Upload buttons
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  // Pick files button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () => _pickDocuments(context),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white
-                                            .withValues(alpha: 0.2),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                          horizontal: 20,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Pick Documents',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 20),
-
-                                  // Take photo button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () => _takePhoto(context),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white
-                                            .withValues(alpha: 0.2),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                          horizontal: 20,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Take Photo',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 20),
-
-                                  // Supported formats info
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Text(
-                                      'Supported formats: PNG, JPG, PDF',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        // Upload buttons
+                        OsmeaComponents.container(
+                          padding: EdgeInsets.all(context.spacing20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: context.borderWidth * 2,
                             ),
-
-                            const SizedBox(height: 20),
-
-                            // Selected documents
-                            if (state is DocumentUploadLoadedState &&
-                                state.documents.isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Selected Documents (${state.documents.length})',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ...state.documents
-                                        .map(
-                                          (doc) =>
-                                              _buildDocumentItem(context, doc),
-                                        )
-                                        .toList(),
-                                  ],
-                                ),
-                              ),
-
-                            // Process button
-                            if (state is DocumentUploadLoadedState &&
-                                state.documents.isNotEmpty)
+                          ),
+                          child: OsmeaComponents.column(
+                            children: [
+                              // Pick files button
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () => _processDocuments(
-                                    context,
-                                    state.documents,
-                                  ),
+                                  onPressed: () => _pickDocuments(context),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white.withValues(
-                                      alpha: 0.3,
+                                      alpha: 0.2,
                                     ),
+                                    foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                       horizontal: 20,
@@ -221,19 +91,152 @@ class DocumentUploadView extends StatelessWidget {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
+                                    elevation: 0,
                                   ),
-                                  child: const Text(
-                                    'Process Documents',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                                  child: OsmeaComponents.text('Pick Documents'),
+                                ),
+                              ),
+
+                              OsmeaComponents.sizedBox(
+                                height: context.height20,
+                              ),
+
+                              // Take photo button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () => _takePhoto(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withValues(
+                                      alpha: 0.2,
                                     ),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 20,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: OsmeaComponents.text('Take Photo'),
+                                ),
+                              ),
+
+                              OsmeaComponents.sizedBox(
+                                height: context.height20,
+                              ),
+
+                              // Pick from gallery button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () =>
+                                      _pickImageFromGallery(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 20,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: OsmeaComponents.text(
+                                    'Pick from Gallery',
                                   ),
                                 ),
                               ),
-                          ],
+
+                              OsmeaComponents.sizedBox(
+                                height: context.height20,
+                              ),
+
+                              // Supported formats info
+                              OsmeaComponents.container(
+                                padding: EdgeInsets.all(context.spacing12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: OsmeaComponents.text(
+                                  'Supported formats: PNG, JPG, PDF\nCamera, Gallery, or File Picker',
+                                  fontSize: context.fontSizeSmall,
+                                  color: Colors.white70,
+                                  textAlign: context.textCenter,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+
+                        OsmeaComponents.sizedBox(height: context.height20),
+
+                        // Selected documents
+                        if (state is DocumentUploadLoadedState &&
+                            state.documents.isNotEmpty)
+                          OsmeaComponents.container(
+                            padding: EdgeInsets.all(context.spacing16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: context.borderWidth * 2,
+                              ),
+                            ),
+                            child: OsmeaComponents.column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OsmeaComponents.text(
+                                  'Selected Documents (${state.documents.length})',
+                                  fontSize: context.fontSizeLarge,
+                                  fontWeight: context.semiBold,
+                                  color: Colors.white,
+                                ),
+                                OsmeaComponents.sizedBox(
+                                  height: context.height12,
+                                ),
+                                ...state.documents
+                                    .map(
+                                      (doc) => _buildDocumentItem(context, doc),
+                                    )
+                                    .toList(),
+                              ],
+                            ),
+                          ),
+
+                        // Process button
+                        if (state is DocumentUploadLoadedState &&
+                            state.documents.isNotEmpty)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () =>
+                                  _processDocuments(context, state.documents),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.3,
+                                ),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 20,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: OsmeaComponents.text('Process Documents'),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -247,18 +250,18 @@ class DocumentUploadView extends StatelessWidget {
   }
 
   Widget _buildDocumentItem(BuildContext context, DocumentFile document) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+    return OsmeaComponents.container(
+      margin: EdgeInsets.only(bottom: context.height8),
+      padding: EdgeInsets.all(context.spacing12),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
+          width: context.borderWidth * 2,
         ),
       ),
-      child: Row(
+      child: OsmeaComponents.row(
         children: [
           Icon(
             document.type == DocumentType.image
@@ -267,25 +270,21 @@ class DocumentUploadView extends StatelessWidget {
             size: 24,
             color: Colors.white.withValues(alpha: 0.8),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+          OsmeaComponents.sizedBox(width: context.width12),
+          OsmeaComponents.expanded(
+            child: OsmeaComponents.column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                OsmeaComponents.text(
                   document.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
+                  fontSize: context.fontSizeSmall,
+                  fontWeight: context.medium,
+                  color: Colors.white,
                 ),
-                Text(
+                OsmeaComponents.text(
                   document.sizeString,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.6),
-                  ),
+                  fontSize: context.fontSizeSmall,
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -302,9 +301,24 @@ class DocumentUploadView extends StatelessWidget {
       final documents = await DocumentService.pickMultipleDocuments();
 
       if (context.mounted) {
+        Logger.success(
+          'Documents picked successfully',
+          category: LogCategory.document,
+          data: {'count': documents.length},
+        );
+
         context.read<DocumentUploadViewModel>().add(
           DocumentUploadDocumentsSelectedEvent(documents),
         );
+
+        if (documents.isNotEmpty && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${documents.length} document(s) selected'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       Logger.error(
@@ -314,9 +328,12 @@ class DocumentUploadView extends StatelessWidget {
       );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to pick documents: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick documents: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -328,9 +345,26 @@ class DocumentUploadView extends StatelessWidget {
       final document = await DocumentService.takePhoto();
 
       if (document != null && context.mounted) {
+        Logger.success(
+          'Photo captured successfully',
+          category: LogCategory.document,
+          data: {'documentName': document.name, 'size': document.sizeString},
+        );
+
         context.read<DocumentUploadViewModel>().add(
           DocumentUploadDocumentsSelectedEvent([document]),
         );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Photo captured: ${document.name}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        Logger.info('No photo taken', category: LogCategory.document);
       }
     } catch (e) {
       Logger.error(
@@ -340,9 +374,64 @@ class DocumentUploadView extends StatelessWidget {
       );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to take photo: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to take photo: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickImageFromGallery(BuildContext context) async {
+    try {
+      Logger.info(
+        'Starting gallery image picker',
+        category: LogCategory.document,
+      );
+
+      final document = await DocumentService.pickImageFromGallery();
+
+      if (document != null && context.mounted) {
+        Logger.success(
+          'Gallery image picked successfully',
+          category: LogCategory.document,
+          data: {'documentName': document.name, 'size': document.sizeString},
+        );
+
+        context.read<DocumentUploadViewModel>().add(
+          DocumentUploadDocumentsSelectedEvent([document]),
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Image picked: ${document.name}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        Logger.info(
+          'No image selected from gallery',
+          category: LogCategory.document,
+        );
+      }
+    } catch (e) {
+      Logger.error(
+        'Gallery image picker failed',
+        category: LogCategory.document,
+        data: {'error': e.toString()},
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image from gallery: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
