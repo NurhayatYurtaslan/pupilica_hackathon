@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:osmea_components/osmea_components.dart';
 import 'package:pupilica_hackathon/core/services/document_service.dart';
+import 'package:pupilica_hackathon/core/services/pdf_service.dart';
 import 'package:pupilica_hackathon/app/routes/app_router.dart';
 import 'package:pupilica_hackathon/app/views/lesson_creation/models/lesson_creation_view_model.dart';
 import 'package:pupilica_hackathon/app/views/lesson_creation/models/module/event.dart';
@@ -47,25 +48,36 @@ class LessonCreationView extends StatelessWidget {
 
           return OsmeaComponents.scaffold(
             appBar: AppBar(
-              backgroundColor: OsmeaColors.purple.withValues(alpha: 0.9),
+              backgroundColor: const Color(0xFF38B6FF),
               elevation: 0,
               leading: IconButton(
                 onPressed: () => context.go(AppRouter.documentUpload),
-                icon: const Icon(Icons.arrow_back, color: OsmeaColors.white),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-              title: OsmeaComponents.text(
-                'Create Lesson',
-                fontSize: context.fontSizeLarge,
-                fontFamily: context.fontRoboto,
-                fontWeight: context.bold,
-                color: OsmeaColors.white,
-                textAlign: context.textCenter,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/rocket-lica.png',
+                    height: 28,
+                    width: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  OsmeaComponents.text(
+                    'RocketLica',
+                    fontSize: context.fontSizeLarge,
+                    fontFamily: context.fontRoboto,
+                    fontWeight: context.bold,
+                    color: Colors.white,
+                    textAlign: context.textCenter,
+                  ),
+                ],
               ),
               centerTitle: true,
               actions: [
                 IconButton(
-                  onPressed: () => _saveLesson(context, state),
-                  icon: const Icon(Icons.save, color: OsmeaColors.white),
+                  onPressed: () => _createNewLesson(context, state),
+                  icon: const Icon(Icons.save, color: Colors.white),
                 ),
               ],
             ),
@@ -99,13 +111,15 @@ class LessonCreationView extends StatelessWidget {
 
                         OsmeaComponents.sizedBox(height: context.height20),
 
-                        // Extracted Text Card
-                        _buildExtractedTextCard(context, state),
+                        // Extracted Text Card (only show if there's extracted text)
+                        if (state.extractedText.isNotEmpty)
+                          _buildExtractedTextCard(context, state),
 
                         OsmeaComponents.sizedBox(height: context.height20),
 
-                        // Save Button
-                        _buildSaveButton(context, state),
+                        // Action Buttons (only show if there's extracted text)
+                        if (state.extractedText.isNotEmpty)
+                          _buildActionButtons(context, state),
                       ],
                     ),
                   ),
@@ -388,15 +402,16 @@ class LessonCreationView extends StatelessWidget {
       child: OsmeaComponents.column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          OsmeaComponents.row(
+          Row(
             children: [
-              OsmeaComponents.text(
-                'Extracted Text',
-                fontSize: context.fontSizeLarge,
-                fontWeight: context.bold,
-                color: OsmeaColors.white,
+              Expanded(
+                child: OsmeaComponents.text(
+                  'Extracted Text',
+                  fontSize: context.fontSizeLarge,
+                  fontWeight: context.bold,
+                  color: OsmeaColors.white,
+                ),
               ),
-              const Spacer(),
               IconButton(
                 onPressed: () => _copyText(context, state.extractedText),
                 icon: const Icon(Icons.copy, color: Colors.white70),
@@ -416,13 +431,13 @@ class LessonCreationView extends StatelessWidget {
               ),
             ),
             child: TextField(
+              controller: TextEditingController(text: state.extractedText),
               onChanged: (value) {
                 context.read<LessonCreationViewModel>().add(
                   LessonCreationUpdateTextEvent(value),
                 );
               },
-              maxLines: null,
-              expands: true,
+              maxLines: 8,
               textAlignVertical: TextAlignVertical.top,
               style: TextStyle(
                 color: OsmeaColors.white,
@@ -445,31 +460,110 @@ class LessonCreationView extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveButton(
+  Widget _buildActionButtons(
     BuildContext context,
     LessonCreationLoadedState state,
   ) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _saveLesson(context, state),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: OsmeaColors.white.withValues(alpha: 0.3),
-          foregroundColor: OsmeaColors.white,
-          padding:
-              context.verticalPaddingMedium + context.horizontalPaddingHigh,
-          shape: RoundedRectangleBorder(
-            borderRadius: context.borderRadiusNormal,
+    return OsmeaComponents.container(
+      padding: EdgeInsets.all(context.spacing20),
+      decoration: BoxDecoration(
+        color: OsmeaColors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: OsmeaColors.white.withValues(alpha: 0.3),
+          width: context.borderWidth * 2,
+        ),
+      ),
+      child: OsmeaComponents.column(
+        children: [
+          OsmeaComponents.text(
+            'What would you like to do?',
+            fontSize: context.fontSizeLarge,
+            fontWeight: context.bold,
+            color: OsmeaColors.white,
+            textAlign: context.textCenter,
           ),
-          elevation: 0,
-        ),
-        child: OsmeaComponents.text(
-          'Save Lesson',
-          fontSize: context.fontSizeMedium,
-          fontFamily: context.fontRoboto,
-          fontWeight: context.semiBold,
-          color: OsmeaColors.white,
-        ),
+          OsmeaComponents.sizedBox(height: context.height16),
+
+          // Option 1: Add to existing lesson
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _showLessonSelection(context, state),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.withValues(alpha: 0.8),
+                foregroundColor: OsmeaColors.white,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: OsmeaComponents.text(
+                'Add to Existing Lesson',
+                fontSize: context.fontSizeMedium,
+                fontWeight: context.semiBold,
+              ),
+            ),
+          ),
+
+          OsmeaComponents.sizedBox(height: context.height12),
+
+          // Option 2: Create new lesson
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _createNewLesson(context, state),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.withValues(alpha: 0.8),
+                foregroundColor: OsmeaColors.white,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: OsmeaComponents.text(
+                'Create New Lesson',
+                fontSize: context.fontSizeMedium,
+                fontWeight: context.semiBold,
+              ),
+            ),
+          ),
+
+          OsmeaComponents.sizedBox(height: context.height12),
+
+          // Option 3: Download as PDF
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _downloadAsPDF(context, state),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.withValues(alpha: 0.8),
+                foregroundColor: OsmeaColors.white,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: OsmeaComponents.text(
+                'Download as PDF',
+                fontSize: context.fontSizeMedium,
+                fontWeight: context.semiBold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -484,7 +578,47 @@ class LessonCreationView extends StatelessWidget {
     );
   }
 
-  void _saveLesson(BuildContext context, LessonCreationLoadedState state) {
+  void _showLessonSelection(
+    BuildContext context,
+    LessonCreationLoadedState state,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: OsmeaColors.purple.withValues(alpha: 0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: OsmeaComponents.text(
+            'Lessons',
+            fontSize: context.fontSizeLarge,
+            fontWeight: context.bold,
+            color: OsmeaColors.white,
+            textAlign: context.textCenter,
+          ),
+          content: OsmeaComponents.text(
+            'This feature will be available in the new version, please follow us for updates!',
+            fontSize: context.fontSizeMedium,
+            color: OsmeaColors.white,
+            textAlign: context.textCenter,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: OsmeaComponents.text(
+                'OK',
+                color: OsmeaColors.white,
+                fontWeight: context.semiBold,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _createNewLesson(BuildContext context, LessonCreationLoadedState state) {
     if (state.title.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -514,5 +648,72 @@ class LessonCreationView extends StatelessWidget {
         documents: state.documents,
       ),
     );
+  }
+
+  void _downloadAsPDF(
+    BuildContext context,
+    LessonCreationLoadedState state,
+  ) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: OsmeaColors.purple.withValues(alpha: 0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Creating PDF...',
+                  color: OsmeaColors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Create and share PDF
+      await PDFService.sharePDF(
+        title: state.title.isNotEmpty ? state.title : 'Untitled Lesson',
+        subject: state.subject.isNotEmpty ? state.subject : 'General',
+        extractedText: state.extractedText,
+        description: state.description.isNotEmpty ? state.description : null,
+      );
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF created and ready to share!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
