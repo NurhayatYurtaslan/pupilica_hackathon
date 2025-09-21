@@ -46,6 +46,7 @@ Closes #42
 * 🔀 **merge**: Merging branches
 * ⏪ **revert**: Reverting a commit
 * 🔖 **release**: Version or release tagging
+* 📦 **move**: Moving files or code to different locations
 * 🌍 **i18n**: Internationalization/localization
 * 🖼️ **ui**: UI/UX updates
 * 📊 **analytics**: Analytics or tracking changes
