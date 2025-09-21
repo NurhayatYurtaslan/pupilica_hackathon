@@ -51,5 +51,10 @@
 	<string>This app needs access to photo library to select documents for OCR processing.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app may need microphone access for document processing features.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
