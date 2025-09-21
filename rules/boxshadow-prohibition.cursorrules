@@ -1,0 +1,207 @@
+# BoxShadow Prohibition Rules
+
+## 🚫 PROHIBITED: BoxShadow Usage
+
+**BoxShadow is STRICTLY PROHIBITED** in this project. This rule ensures clean, flat design principles and consistent visual hierarchy.
+
+## 📋 Rules
+
+### ❌ NEVER Use BoxShadow
+
+1. **In any BoxDecoration**
+2. **In any Container decoration**
+3. **In any Card elevation**
+4. **In any Material widget**
+5. **For depth or elevation effects**
+
+### ✅ ALWAYS Use Instead
+
+1. **Borders** - Use `Border.all()` for definition
+2. **Color Variations** - Use `OsmeaColors` with alpha values
+3. **Background Colors** - Use different opacity levels
+4. **Border Radius** - Use `context.borderRadius*` extensions
+5. **Clean Flat Design** - Focus on typography and spacing
+
+## 🎨 Design Principles
+
+### 1. Clean Flat Design
+```dart
+// ❌ WRONG - Using BoxShadow
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    borderRadius: BorderRadius.circular(8),
+    boxShadow: [
+      BoxShadow(
+        color: OsmeaColors.black.withValues(alpha: 0.1),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+)
+
+// ✅ CORRECT - Using borders and alpha
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white.withValues(alpha: 0.95),
+    borderRadius: context.borderRadiusNormal,
+    border: Border.all(
+      color: OsmeaColors.grayMaterial200,
+      width: 1,
+    ),
+  ),
+)
+```
+
+### 2. Depth Through Color
+```dart
+// ❌ WRONG - Using BoxShadow for depth
+Card(
+  elevation: 4,
+  child: Text('Content'),
+)
+
+// ✅ CORRECT - Using color variations
+OsmeaComponents.container(
+  color: OsmeaColors.paperWhite,
+  border: Border.all(
+    color: OsmeaColors.silver,
+    width: 1,
+  ),
+  child: OsmeaComponents.text('Content'),
+)
+```
+
+### 3. Visual Hierarchy
+```dart
+// ❌ WRONG - Using BoxShadow for hierarchy
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    boxShadow: [
+      BoxShadow(
+        color: OsmeaColors.black.withValues(alpha: 0.2),
+        blurRadius: 15,
+        offset: Offset(0, 8),
+      ),
+    ],
+  ),
+)
+
+// ✅ CORRECT - Using color and border hierarchy
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    borderRadius: context.borderRadiusHigh,
+    border: Border.all(
+      color: OsmeaColors.nordicBlue.withValues(alpha: 0.3),
+      width: 2,
+    ),
+  ),
+)
+```
+
+## 🔧 Alternative Techniques
+
+### 1. Border-Based Depth
+```dart
+// Use different border widths and colors
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    border: Border.all(
+      color: OsmeaColors.grayMaterial300,
+      width: 2,
+    ),
+  ),
+)
+```
+
+### 2. Alpha-Based Layering
+```dart
+// Use alpha values for layering
+Stack(
+  children: [
+    Container(
+      color: OsmeaColors.nordicBlue.withValues(alpha: 0.1),
+    ),
+    Container(
+      color: OsmeaColors.white.withValues(alpha: 0.9),
+    ),
+  ],
+)
+```
+
+### 3. Color Contrast
+```dart
+// Use color contrast for emphasis
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.nordicBlue,
+    borderRadius: context.borderRadiusNormal,
+  ),
+  child: OsmeaComponents.text(
+    'Primary Action',
+    color: OsmeaColors.white,
+  ),
+)
+```
+
+## 📱 Mobile-First Considerations
+
+### 1. Touch-Friendly Design
+```dart
+// Focus on touch targets and spacing
+OsmeaComponents.container(
+  padding: context.paddingHigh,
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    borderRadius: context.borderRadiusHigh,
+    border: Border.all(
+      color: OsmeaColors.grayMaterial200,
+      width: 1,
+    ),
+  ),
+)
+```
+
+### 2. Performance Optimization
+```dart
+// Avoid expensive shadow calculations
+Container(
+  decoration: BoxDecoration(
+    color: OsmeaColors.white,
+    borderRadius: BorderRadius.circular(8),
+    // No BoxShadow - better performance
+  ),
+)
+```
+
+## 🎯 Benefits
+
+1. **Clean Design** - Modern, flat design aesthetic
+2. **Performance** - No expensive shadow calculations
+3. **Consistency** - Uniform visual language
+4. **Accessibility** - Better contrast and readability
+5. **Maintainability** - Easier to update and modify
+
+## 🚨 Code Review Checklist
+
+- [ ] No BoxShadow usage in any decoration
+- [ ] Using borders for definition instead
+- [ ] Using OsmeaColors with alpha values
+- [ ] Following clean flat design principles
+- [ ] Consistent visual hierarchy
+- [ ] Mobile-friendly touch targets
+- [ ] Performance optimized
+
+## 📚 Resources
+
+- [Material Design - No Elevation](https://material.io/design/environment/light-shadows.html)
+- [iOS Human Interface Guidelines - Flat Design](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/)
+- [OSMEA Design System](https://github.com/masterfabric-mobile/osmea)
+
+---
+
+**Remember**: BoxShadow is PROHIBITED. Use borders, colors, and spacing for visual hierarchy instead.

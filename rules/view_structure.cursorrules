@@ -34,6 +34,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:osmea_components/osmea_components.dart';
+import 'package:pupilica_hackathon/core/helpers/logger/logger.dart';
 import 'package:pupilica_hackathon/app/views/{view_name}/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/{view_name}/models/module/state.dart';
 import 'package:pupilica_hackathon/app/views/{view_name}/models/{view_name}_view_model.dart';
@@ -53,7 +54,24 @@ class {ViewName}View extends StatelessWidget {
           return OsmeaComponents.scaffold(
             body: OsmeaComponents.center(
               child: OsmeaComponents.container(
-                child: OsmeaComponents.text('{ViewName}'),
+                padding: context.paddingNormal,
+                child: OsmeaComponents.column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    OsmeaComponents.text(
+                      '{ViewName}',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: OsmeaColors.nordicBlue,
+                    ),
+                    OsmeaComponents.sizedBox(height: context.height16),
+                    OsmeaComponents.text(
+                      'Welcome to {ViewName}',
+                      fontSize: 16,
+                      color: OsmeaColors.gray600,
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -70,6 +88,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:osmea_components/osmea_components.dart';
+import 'package:pupilica_hackathon/core/helpers/logger/logger.dart';
 import 'package:pupilica_hackathon/app/views/{view_name}/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/{view_name}/models/module/state.dart';
 
@@ -82,8 +101,9 @@ class {ViewName}ViewModel extends Bloc<{ViewName}Event, {ViewName}State> {
     {ViewName}InitialEvent event,
     Emitter<{ViewName}State> emit,
   ) async {
+    Logger.info('{ViewName} initial event received', category: LogCategory.splash);
     await Future.delayed(event.context.durationMedium);
-    print('{ViewName} Initial');
+    Logger.success('{ViewName} initialization completed', category: LogCategory.splash);
   }
 }
 ```
@@ -113,14 +133,24 @@ class {ViewName}InitialEvent extends {ViewName}Event {
 - Always import `osmea_components` for UI components
 - Use `flutter_bloc` for state management
 - Use `flutter/services.dart` for system UI management
+- **Always import logger**: `package:pupilica_hackathon/core/helpers/logger/logger.dart`
 - Import local models with full package paths
 
 ### 2. UI Component Guidelines
+- **ALWAYS use OsmeaComponents** instead of standard Flutter widgets
 - Use `OsmeaComponents.scaffold()` for main scaffold
 - Use `OsmeaComponents.center()` for centering content
 - Use `OsmeaComponents.container()` for containers
+- Use `OsmeaComponents.column()` and `OsmeaComponents.row()` for layouts
 - Use `OsmeaComponents.text()` for text elements
-- Use `OsmeaComponents.durationMedium` for timing delays
+- Use `OsmeaComponents.button()` for buttons
+- Use `OsmeaComponents.textField()` for text inputs
+- Use `OsmeaComponents.cards()` for card components
+- Use `OsmeaComponents.listView()` for lists
+- Use `OsmeaComponents.loading()` for loading states
+- Use `OsmeaComponents.toast()` for notifications
+- Use `OsmeaColors` instead of standard `Colors`
+- Use `context.durationMedium` for timing delays
 
 ### 3. State Management
 - Use BLoC pattern with `BlocProvider` and `BlocBuilder`
@@ -135,7 +165,29 @@ class {ViewName}InitialEvent extends {ViewName}Event {
 ### 5. Import Structure
 - Use full package paths for local imports
 - Group imports: Flutter, packages, local files
+- **Always include logger import** in the packages group
 - Keep imports organized and clean
+
+### 6. Logging Guidelines
+- **NEVER use print() or debugPrint()** - always use Logger
+- Use appropriate log categories (splash, navigation, api, etc.)
+- Use appropriate log levels (debug, info, warning, error, success)
+- Include structured data when relevant
+- Log important events and state changes
+
+### 7. OsmeaComponents Guidelines
+- **NEVER use standard Flutter widgets** - always use OsmeaComponents
+- Use `OsmeaComponents.text()` instead of `Text()`
+- Use `OsmeaComponents.button()` instead of `ElevatedButton()`
+- Use `OsmeaComponents.container()` instead of `Container()`
+- Use `OsmeaComponents.column()` instead of `Column()`
+- Use `OsmeaComponents.row()` instead of `Row()`
+- Use `OsmeaColors` instead of `Colors`
+- Use `OsmeaComponents.scaffold()` instead of `Scaffold()`
+- Use `OsmeaComponents.cards()` instead of `Card()`
+- Use `OsmeaComponents.listView()` instead of `ListView()`
+- Use `OsmeaComponents.textField()` instead of `TextFormField()`
+- Use `OsmeaComponents.loading()` instead of `CircularProgressIndicator()`
 
 ## Best Practices
 
@@ -144,8 +196,11 @@ class {ViewName}InitialEvent extends {ViewName}Event {
 3. **Full Package Paths**: Use complete package paths for local imports
 4. **System UI**: Handle system UI visibility when needed
 5. **Timing**: Use `context.durationMedium` for consistent timing
-6. **Debugging**: Add print statements for debugging during development
-7. **Extensibility**: Structure allows for easy expansion when needed
+6. **Debugging**: Use Logger with appropriate categories and levels for debugging
+7. **OsmeaComponents**: Always use OsmeaComponents instead of standard Flutter widgets
+8. **OsmeaColors**: Always use OsmeaColors instead of standard Colors
+9. **Responsive Design**: Use sizer extensions for responsive layouts
+10. **Extensibility**: Structure allows for easy expansion when needed
 
 ## Example Implementation
 See `splash/` folder for a complete implementation example following these rules.

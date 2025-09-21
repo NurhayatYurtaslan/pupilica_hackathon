@@ -1,0 +1,282 @@
+# Logger Usage Rules for Flutter App
+
+## Overview
+This project uses a custom Logger class instead of `print()` and `debugPrint()` statements. The logger provides structured, categorized, and colorized logging with different levels and categories.
+
+## Import Statement
+Always import the logger at the top of your files:
+```dart
+import 'package:pupilica_hackathon/core/helpers/logger/logger.dart';
+```
+
+## When to Use Logger Instead of print/debugPrint
+
+### ✅ ALWAYS Use Logger For:
+
+1. **Debugging Information**
+   - Variable values during development
+   - Function entry/exit points
+   - State changes in BLoC
+   - API request/response data
+
+2. **Error Handling**
+   - Exception catching and logging
+   - API errors
+   - Validation failures
+   - System errors
+
+3. **User Flow Tracking**
+   - Navigation events
+   - Button clicks
+   - Form submissions
+   - Authentication events
+
+4. **Performance Monitoring**
+   - Function execution times
+   - API response times
+   - Memory usage warnings
+
+5. **Business Logic Events**
+   - OCR processing results
+   - Data processing steps
+   - Feature usage tracking
+
+### ❌ NEVER Use print/debugPrint For:
+
+1. **Production Code** - Logger provides better control
+2. **Structured Data** - Logger handles JSON/Map formatting
+3. **Error Context** - Logger includes stack traces
+4. **Categorized Logs** - Logger provides category-based filtering
+5. **Colorized Output** - Logger provides visual distinction
+
+## Logger Methods and Usage
+
+### 1. Debug Logging
+```dart
+// For development debugging
+Logger.debug('User tapped login button', category: LogCategory.ui);
+Logger.debug('API response received', category: LogCategory.api, data: {'status': 200, 'data': responseData});
+```
+
+### 2. Info Logging
+```dart
+// For general information
+Logger.info('User successfully logged in', category: LogCategory.auth);
+Logger.info('Navigation to home screen', category: LogCategory.navigation);
+```
+
+### 3. Warning Logging
+```dart
+// For potential issues
+Logger.warning('API response time exceeded 5 seconds', category: LogCategory.api);
+Logger.warning('Low memory detected', category: LogCategory.general);
+```
+
+### 4. Error Logging
+```dart
+// For errors and exceptions
+try {
+  // Some operation
+} catch (e, stackTrace) {
+  Logger.error('Failed to process OCR image', 
+    category: LogCategory.ocr, 
+    error: e, 
+    stackTrace: stackTrace);
+}
+
+// For API errors
+Logger.error('Login failed', 
+  category: LogCategory.auth, 
+  data: {'error_code': 401, 'message': 'Invalid credentials'});
+```
+
+### 5. Success Logging
+```dart
+// For successful operations
+Logger.success('OCR processing completed successfully', category: LogCategory.ocr);
+Logger.success('Data saved to database', category: LogCategory.database);
+```
+
+## Log Categories
+
+Use appropriate categories for better log organization:
+
+- `LogCategory.splash` - Splash screen related logs
+- `LogCategory.navigation` - Navigation and routing logs
+- `LogCategory.api` - API calls and responses
+- `LogCategory.database` - Database operations
+- `LogCategory.ui` - UI interactions and state changes
+- `LogCategory.auth` - Authentication and authorization
+- `LogCategory.ocr` - OCR processing and image analysis
+- `LogCategory.general` - General purpose logs
+
+## Code Examples
+
+### BLoC Event Handling
+```dart
+// ❌ Wrong - using print
+Future<FutureOr<void>> _onLoginEvent(
+  LoginEvent event,
+  Emitter<LoginState> emit,
+) async {
+  print('Login event received'); // ❌ Don't use print
+  // ... logic
+}
+
+// ✅ Correct - using Logger
+Future<FutureOr<void>> _onLoginEvent(
+  LoginEvent event,
+  Emitter<LoginState> emit,
+) async {
+  Logger.info('Login event received', category: LogCategory.auth);
+  // ... logic
+}
+```
+
+### Error Handling
+```dart
+// ❌ Wrong - using print for errors
+try {
+  await apiCall();
+} catch (e) {
+  print('Error: $e'); // ❌ Don't use print for errors
+}
+
+// ✅ Correct - using Logger
+try {
+  await apiCall();
+} catch (e, stackTrace) {
+  Logger.error('API call failed', 
+    category: LogCategory.api, 
+    error: e, 
+    stackTrace: stackTrace);
+}
+```
+
+### UI State Changes
+```dart
+// ❌ Wrong - using debugPrint
+void _onButtonPressed() {
+  debugPrint('Button pressed'); // ❌ Don't use debugPrint
+  setState(() {
+    // state change
+  });
+}
+
+// ✅ Correct - using Logger
+void _onButtonPressed() {
+  Logger.debug('Button pressed', category: LogCategory.ui);
+  setState(() {
+    // state change
+  });
+}
+```
+
+### API Response Logging
+```dart
+// ❌ Wrong - using print
+Future<ApiResponse> fetchData() async {
+  print('Fetching data from API'); // ❌ Don't use print
+  final response = await http.get(uri);
+  print('Response: ${response.body}'); // ❌ Don't use print
+  return ApiResponse.fromJson(jsonDecode(response.body));
+}
+
+// ✅ Correct - using Logger
+Future<ApiResponse> fetchData() async {
+  Logger.info('Fetching data from API', category: LogCategory.api);
+  final response = await http.get(uri);
+  Logger.debug('API response received', 
+    category: LogCategory.api, 
+    data: {'status_code': response.statusCode, 'body_length': response.body.length});
+  return ApiResponse.fromJson(jsonDecode(response.body));
+}
+```
+
+## Best Practices
+
+### 1. Consistent Category Usage
+- Always use the most specific category
+- Group related logs under the same category
+- Use `LogCategory.general` only when no other category fits
+
+### 2. Meaningful Messages
+```dart
+// ❌ Poor message
+Logger.debug('test', category: LogCategory.general);
+
+// ✅ Good message
+Logger.debug('User profile loaded successfully', category: LogCategory.ui);
+```
+
+### 3. Structured Data
+```dart
+// ✅ Include relevant data for debugging
+Logger.debug('OCR processing started', 
+  category: LogCategory.ocr, 
+  data: {
+    'image_size': '${image.width}x${image.height}',
+    'processing_time': '${DateTime.now().millisecondsSinceEpoch}'
+  });
+```
+
+### 4. Error Context
+```dart
+// ✅ Always include error and stack trace for exceptions
+try {
+  // risky operation
+} catch (e, stackTrace) {
+  Logger.error('Operation failed', 
+    category: LogCategory.general, 
+    error: e, 
+    stackTrace: stackTrace,
+    data: {'operation': 'data_processing', 'user_id': userId});
+}
+```
+
+### 5. Performance Logging
+```dart
+// ✅ Log performance metrics
+final stopwatch = Stopwatch()..start();
+// ... operation
+stopwatch.stop();
+Logger.info('Operation completed', 
+  category: LogCategory.general, 
+  data: {'duration_ms': stopwatch.elapsedMilliseconds});
+```
+
+## Migration Guidelines
+
+When refactoring existing code:
+
+1. **Find all print/debugPrint statements**
+2. **Determine the appropriate log level** (debug, info, warning, error, success)
+3. **Choose the right category** based on context
+4. **Add structured data** if relevant
+5. **Include error handling** for try-catch blocks
+
+## Development vs Production
+
+- **Development**: Use all log levels liberally for debugging
+- **Production**: Consider removing or reducing debug logs
+- **Error logs**: Always keep in production for monitoring
+- **Info logs**: Keep important business logic logs
+
+## Log Output Format
+
+The logger provides structured output with:
+- Timestamp
+- App name
+- Category emoji and name
+- Level emoji and name
+- Message
+- Additional data (if provided)
+- Color coding for different levels
+
+Example output:
+```
+[2024-01-15T10:30:45.123Z] Pupilica AI 🚀 SPLASH ℹ️ INFO: Splash screen initialized
+[2024-01-15T10:30:45.456Z] Pupilica AI 🌐 API 🐛 DEBUG: API request sent | Data: {url: /api/login, method: POST}
+```
+
+This structured approach makes debugging much more efficient and provides better insights into application behavior.
