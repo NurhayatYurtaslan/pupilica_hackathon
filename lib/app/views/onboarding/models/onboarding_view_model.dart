@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
-import 'package:pupilica_hackathon/core/services/onboarding_service.dart';
 import 'package:pupilica_hackathon/core/constants/onboarding_constants.dart';
+import 'package:pupilica_hackathon/core/helpers/local_storage_helper.dart';
 import 'package:pupilica_hackathon/app/views/onboarding/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/onboarding/models/module/state.dart';
 
@@ -87,10 +87,18 @@ class OnboardingViewModel extends Bloc<OnboardingEvent, OnboardingState> {
     Emitter<OnboardingState> emit,
   ) async {
     // Skip to last page (Get Started page)
-    final totalPages = OnboardingConstants.pages.length;
-    currentIndex = totalPages - 1;
+    currentIndex = OnboardingConstants.pages.length - 1;
     isSkipping = true;
 
+    // First emit the state change
+    emit(
+      OnboardingLoadedState(
+        currentPage: currentIndex,
+        pages: OnboardingConstants.pages,
+      ),
+    );
+
+    // Then animate to the page
     pageController.animateToPage(
       currentIndex,
       duration: const Duration(milliseconds: 300),
@@ -101,19 +109,13 @@ class OnboardingViewModel extends Bloc<OnboardingEvent, OnboardingState> {
     Future.delayed(const Duration(milliseconds: 350), () {
       isSkipping = false;
     });
-
-    emit(
-      OnboardingLoadedState(
-        currentPage: currentIndex,
-        pages: OnboardingConstants.pages,
-      ),
-    );
   }
 
   Future<FutureOr<void>> _onOnboardingCompleteEvent(
     OnboardingCompleteEvent event,
     Emitter<OnboardingState> emit,
   ) async {
-    await OnboardingService.completeOnboarding();
+    // Mark onboarding as completed
+    await LocalStorageHelper.saveBool('onboarding_completed', true);
   }
 }

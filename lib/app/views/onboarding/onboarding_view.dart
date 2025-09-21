@@ -78,9 +78,14 @@ class OnboardingView extends StatelessWidget {
                       .pageController,
                   itemCount: state.pages.length,
                   onPageChanged: (index) {
-                    // Skip işlemi sırasında onPageChanged'i devre dışı bırak
                     final viewModel = context.read<OnboardingViewModel>();
-                    if (!viewModel.isSkipping && index != state.currentPage) {
+
+                    // Skip işlemi sırasında onPageChanged'i tamamen devre dışı bırak
+                    if (viewModel.isSkipping) {
+                      return;
+                    }
+
+                    if (index != state.currentPage) {
                       if (index > state.currentPage) {
                         viewModel.add(OnboardingNextPageEvent());
                       } else {
