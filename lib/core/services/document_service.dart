@@ -11,7 +11,7 @@ class DocumentService {
   /// Pick multiple documents (iOS and Web)
   static Future<List<DocumentFile>> pickMultipleDocuments() async {
     try {
-      Logger.info('Starting document picker', category: LogCategory.document);
+      Logger.info('Dosya seçici başlatılıyor', category: LogCategory.document);
 
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -20,7 +20,7 @@ class DocumentService {
       );
 
       if (result == null || result.files.isEmpty) {
-        Logger.info('No documents selected', category: LogCategory.document);
+        Logger.info('Dosya seçilmedi', category: LogCategory.document);
         return [];
       }
 
@@ -39,17 +39,15 @@ class DocumentService {
       }
 
       Logger.success(
-        'Documents picked successfully',
+        '${documents.length} dosya seçildi',
         category: LogCategory.document,
-        data: {'count': documents.length},
       );
 
       return documents;
     } catch (e) {
-      Logger.error(
-        'Document picker failed',
+      Logger.errorSimple(
+        'Dosya seçici başarısız: ${e.toString()}',
         category: LogCategory.document,
-        data: {'error': e.toString()},
       );
       throw Exception('Failed to pick documents: $e');
     }
@@ -106,7 +104,7 @@ class DocumentService {
   /// Take photo with camera
   static Future<DocumentFile?> takePhoto() async {
     try {
-      Logger.info('Starting camera capture', category: LogCategory.document);
+      Logger.info('Kamera başlatılıyor', category: LogCategory.document);
 
       final image = await _imagePicker.pickImage(
         source: ImageSource.camera,
@@ -114,7 +112,7 @@ class DocumentService {
       );
 
       if (image == null) {
-        Logger.info('No photo taken', category: LogCategory.document);
+        Logger.info('Fotoğraf çekilmedi', category: LogCategory.document);
         return null;
       }
 
@@ -126,17 +124,15 @@ class DocumentService {
       );
 
       Logger.success(
-        'Photo captured successfully',
+        'Fotoğraf çekildi',
         category: LogCategory.document,
-        data: {'path': document.path},
       );
 
       return document;
     } catch (e) {
-      Logger.error(
-        'Camera capture failed',
+      Logger.errorSimple(
+        'Kamera başarısız: ${e.toString()}',
         category: LogCategory.document,
-        data: {'error': e.toString()},
       );
       throw Exception('Failed to take photo: $e');
     }
