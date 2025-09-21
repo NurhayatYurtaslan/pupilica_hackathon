@@ -4,11 +4,8 @@ import 'package:pupilica_hackathon/app/views/splash/splash_view.dart';
 import 'package:pupilica_hackathon/app/views/onboarding/onboarding_view.dart';
 import 'package:pupilica_hackathon/app/views/home/home_view.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/document_upload_view.dart';
-import 'package:pupilica_hackathon/app/views/lesson_list/lesson_list_view.dart';
-import 'package:pupilica_hackathon/app/views/lesson_detail/lesson_detail_view.dart';
 import 'package:pupilica_hackathon/app/views/lesson_creation/lesson_creation_view.dart';
 import 'package:pupilica_hackathon/core/services/document_service.dart';
-import 'package:pupilica_hackathon/core/models/lesson_note.dart';
 
 /// App router configuration using Go Router
 class AppRouter {
@@ -17,8 +14,6 @@ class AppRouter {
   static const String home = '/home';
   static const String documentUpload = '/document-upload';
   static const String lessonCreation = '/lesson-creation';
-  static const String lessonList = '/lesson-list';
-  static const String lessonDetail = '/lesson-detail';
 
   /// Go Router configuration
   static final GoRouter router = GoRouter(
@@ -50,26 +45,6 @@ class AppRouter {
         path: documentUpload,
         name: 'documentUpload',
         builder: (context, state) => const DocumentUploadView(),
-      ),
-
-      // Lesson List
-      GoRoute(
-        path: lessonList,
-        name: 'lessonList',
-        builder: (context, state) => const LessonListView(),
-      ),
-
-      // Lesson Detail
-      GoRoute(
-        path: lessonDetail,
-        name: 'lessonDetail',
-        builder: (context, state) {
-          final lesson = state.extra as LessonNote?;
-          if (lesson == null) {
-            return _buildErrorPage(context, Exception('Lesson not found'));
-          }
-          return LessonDetailView(lesson: lesson);
-        },
       ),
 
       // Lesson Creation
