@@ -20,6 +20,8 @@ A modern Flutter application developed for the Pupilica AI Hackathon that conver
 - [Development Notes](#development-notes)
 - [Contributing](#contributing)
 - [License](#license)
+- [License Notice](#important-license-notice)
+- [Team Members](#team-members)
 
 ## 🎯 About the Project
 
@@ -94,7 +96,7 @@ RocketLica is a mobile application that allows users to upload photos and PDF do
 - **Share Plus**: 7.2.2 - File sharing
 
 ### UI Components
-- **Osmea Components**: Custom component library
+- **Osmea Components**: Custom component library (AGPLv3) - *Used as Osmea Teams member*
 - **Device Frame**: 1.4.0 - Device frame display
 
 ## 📁 Project Structure
@@ -168,7 +170,7 @@ flutter run -d web
 |---------|---------|-------------|
 | `cupertino_icons` | ^1.0.8 | iOS icons |
 | `device_frame` | ^1.4.0 | Device frame display |
-| `osmea_components` | git | Custom UI components |
+| `osmea_components` | git (AGPLv3) | Custom UI components (*Osmea Teams member*) |
 | `go_router` | ^16.2.1 | Declarative routing |
 
 ### State Management
@@ -449,6 +451,17 @@ static final GoRouter router = GoRouter(
 
 This project is licensed under the [MIT License](LICENSE).
 
+### ⚠️ Important License Notice
+
+This project contains dependencies with **different license requirements**:
+
+- **Most dependencies**: MIT, Apache 2.0, BSD licenses (permissive)
+- **Osmea Components**: AGPLv3 license (**copyleft with network clause**)
+
+**AGPLv3 Impact**: If you deploy this application where users access it over a network (web/server), you must provide the complete source code to users.
+
+For detailed license information and compliance requirements, see [LICENSES.md](LICENSES.md).
+
 ### Third-Party Licenses
 
 This project uses the following third-party packages with their respective licenses:
@@ -486,10 +499,21 @@ This project uses the following third-party packages with their respective licen
 - **slang_build_runner**: Copyright 2022 Simon Choi
 - **flutter_lints**: Copyright 2021 The Flutter Authors
 
+#### AGPLv3 License
+- **osmea_components**: Copyright Osmea Teams - [View License](https://github.com/masterfabric-mobile/osmea/blob/main/LICENSE)
+
+**📋 Usage Notice**: Osmea Components has been used as an Osmea Teams member.
+
+**⚠️ Important AGPLv3 Notice**: The Osmea Components library uses AGPLv3 license, which requires:
+- Source code disclosure for network/web deployments
+- Any modifications must be shared under AGPLv3
+- Affects SaaS and web applications
+- See [LICENSES.md](LICENSES.md) for complete compliance details
+
 ## 🙏 Acknowledgments
 
 - **flutter_tesseract_ocr**: For OCR processing capabilities
-- **Osmea Components**: For UI components library
+- **Osmea Components**: For UI components library (AGPLv3) - *Used as Osmea Teams member*
 - **Flutter Team**: For the amazing framework
 - **Pupilica**: For organizing the hackathon
 - **💙 Osmea Teams**: Special thanks to Osmea Teams for their support
@@ -500,9 +524,23 @@ This project uses the following third-party packages with their respective licen
 - **Repository**: [pupilica_hackathon](https://github.com/NurhayatYurtaslan/pupilica_hackathon)
 - **Developer**: Nurhayat Yurtaslan
 - **GitHub**: [@NurhayatYurtaslan](https://github.com/NurhayatYurtaslan)
+- **License Details**: See [LICENSES.md](LICENSES.md) for complete information
+
+### 👥 Team Members
+
+| Name | GitHub Profile | Role |
+|------|----------------|------|
+| **Nurhayat Yurtaslan** | [@NurhayatYurtaslan](https://github.com/NurhayatYurtaslan) | Team Lead & Developer |
+| **Melih Alkabak** | [@melihalkbk](https://github.com/melihalkbk) | Developer |
+| **Sultan Kayı** | [@sultannkayi](https://github.com/sultannkayi) | Developer |
+
+**Team:** RocketLica Development Team  
+**Hackathon:** Pupilica Yapay Zeka Hackathonu
 
 ---
 
 **RocketLica** - AI-Powered Document to PDF Converter 🚀📄
 
-*This project was created for the Pupilica Yapay Zeka Hackathonu.*
+*This project was created for the Pupilica Yapay Zeka Hackathonu by the RocketLica Development Team.*
+
+**Team:** [@NurhayatYurtaslan](https://github.com/NurhayatYurtaslan) • [@melihalkbk](https://github.com/melihalkbk) • [@sultannkayi](https://github.com/sultannkayi)
