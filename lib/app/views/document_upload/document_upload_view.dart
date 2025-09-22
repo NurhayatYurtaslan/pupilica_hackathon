@@ -1,15 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:osmea_components/osmea_components.dart';
 import 'package:pupilica_hackathon/core/helpers/logger.dart';
+import 'package:pupilica_hackathon/core/helpers/file_download_helper.dart';
 import 'package:pupilica_hackathon/core/services/document_service.dart';
 import 'package:pupilica_hackathon/core/services/pdf_service.dart';
-import 'package:pupilica_hackathon/app/routes/app_router.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/models/module/event.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/models/module/state.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/models/document_upload_view_model.dart';
+import 'package:pupilica_hackathon/app/routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class DocumentUploadView extends StatelessWidget {
   const DocumentUploadView({super.key});
@@ -54,10 +56,10 @@ class DocumentUploadView extends StatelessWidget {
 
                         // Upload buttons
                         OsmeaComponents.container(
-                          padding: EdgeInsets.all(context.spacing20),
+                          padding: EdgeInsets.all(context.spacing16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: OsmeaComponents.column(
                             children: [
@@ -206,10 +208,16 @@ class DocumentUploadView extends StatelessWidget {
                                     color: Colors.black.withValues(alpha: 0.3),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: OsmeaComponents.text(
-                                    state.extractedText,
-                                    fontSize: context.fontSizeSmall,
-                                    color: Colors.white,
+                                  child: SizedBox(
+                                    height:
+                                        200, // Fixed height for scrollable area
+                                    child: SingleChildScrollView(
+                                      child: OsmeaComponents.text(
+                                        state.extractedText,
+                                        fontSize: context.fontSizeSmall,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 OsmeaComponents.sizedBox(
@@ -234,7 +242,7 @@ class DocumentUploadView extends StatelessWidget {
                                       ),
                                       elevation: 0,
                                     ),
-                                    child: OsmeaComponents.text('Preview PDF'),
+                                    child: OsmeaComponents.text('Create PDF'),
                                   ),
                                 ),
                               ],
@@ -337,33 +345,26 @@ class DocumentUploadView extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        height: 60,
+        height: 50,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: OsmeaComponents.row(
           children: [
             const SizedBox(width: 16),
-            Icon(icon, size: 24, color: Colors.white),
+            Icon(icon, size: 20, color: Colors.white),
             const SizedBox(width: 12),
             OsmeaComponents.text(
               title,
-              fontSize: context.fontSizeMedium,
+              fontSize: context.fontSizeSmall,
               fontWeight: context.medium,
               color: Colors.white,
             ),
             const Spacer(),
             const Icon(
               Icons.arrow_forward_ios,
-              size: 16,
+              size: 14,
               color: Colors.white70,
             ),
             const SizedBox(width: 16),
@@ -431,17 +432,28 @@ class DocumentUploadView extends StatelessWidget {
           data: {'count': documents.length},
         );
 
-        context.read<DocumentUploadViewModel>().add(
-          DocumentUploadDocumentsSelectedEvent(documents),
-        );
+        // Check if any PDF files were selected
+        final pdfDocuments = documents
+            .where((doc) => doc.name.toLowerCase().endsWith('.pdf'))
+            .toList();
 
-        if (documents.isNotEmpty && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${documents.length} document(s) selected'),
-              backgroundColor: Colors.green,
-            ),
+        if (pdfDocuments.isNotEmpty) {
+          // Show PDF save location dialog
+          await _showPDFSaveLocationDialog(context, pdfDocuments);
+        } else {
+          // Process as normal documents
+          context.read<DocumentUploadViewModel>().add(
+            DocumentUploadDocumentsSelectedEvent(documents),
           );
+
+          if (documents.isNotEmpty && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${documents.length} document(s) selected'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -598,50 +610,45 @@ class DocumentUploadView extends StatelessWidget {
       await context.read<DocumentUploadViewModel>().processDocuments(documents);
 
       // Check if processing was successful
-      final currentState = context.read<DocumentUploadViewModel>().state;
+      if (context.mounted) {
+        final currentState = context.read<DocumentUploadViewModel>().state;
 
-      if (currentState is DocumentUploadSuccessState) {
-        Logger.success(
-          'Documents processed successfully',
-          category: LogCategory.document,
-          data: {'textLength': currentState.extractedText.length},
-        );
+        if (currentState is DocumentUploadSuccessState) {
+          Logger.success(
+            'Documents processed successfully',
+            category: LogCategory.document,
+            data: {'textLength': currentState.extractedText.length},
+          );
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Successfully processed ${documents.length} document(s)',
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Successfully processed ${documents.length} document(s)',
+                ),
+                backgroundColor: Colors.green,
               ),
-              backgroundColor: Colors.green,
-            ),
+            );
+
+            // Stay on document upload page to show PDF creation option
+          }
+        } else if (currentState is DocumentUploadErrorState) {
+          Logger.error(
+            'Document processing failed',
+            category: LogCategory.document,
+            data: {'error': currentState.error},
           );
 
-          // Navigate to lesson creation with extracted text
-          context.go(
-            AppRouter.lessonCreation,
-            extra: {
-              'documents': documents,
-              'extractedText': currentState.extractedText,
-            },
-          );
-        }
-      } else if (currentState is DocumentUploadErrorState) {
-        Logger.error(
-          'Document processing failed',
-          category: LogCategory.document,
-          data: {'error': currentState.error},
-        );
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Failed to process documents: ${currentState.error}',
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Failed to process documents: ${currentState.error}',
+                ),
+                backgroundColor: Colors.red,
               ),
-              backgroundColor: Colors.red,
-            ),
-          );
+            );
+          }
         }
       }
     } catch (e) {
@@ -673,7 +680,7 @@ class DocumentUploadView extends StatelessWidget {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
+            backgroundColor: OsmeaColors.nordicBlue.withValues(alpha: 0.9),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -685,7 +692,7 @@ class DocumentUploadView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 OsmeaComponents.text(
-                  'Creating PDF preview...',
+                  'Creating PDF...',
                   color: Colors.white,
                   fontSize: context.fontSizeMedium,
                 ),
@@ -706,68 +713,145 @@ class DocumentUploadView extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
 
-        // Show PDF preview dialog
+        Logger.info(
+          'Navigating to PDF Preview',
+          category: LogCategory.document,
+          data: {
+            'extractedTextLength': state.extractedText.length,
+            'documentCount': state.documents.length,
+            'pdfBytesSize': pdfBytes.length,
+          },
+        );
+
+        // Navigate to PDF Preview page
+        context.go(
+          AppRouter.pdfPreview,
+          extra: {
+            'extractedText': state.extractedText,
+            'documentNames': state.documents.map((doc) => doc.name).toList(),
+            'pdfBytes': pdfBytes,
+          },
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _savePDFToDevice(
+    BuildContext context,
+    Uint8List pdfBytes,
+    String extractedText,
+  ) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: OsmeaColors.nordicBlue.withValues(alpha: 0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Saving PDF to device...',
+                  color: Colors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Generate filename
+      final fileName = 'Document_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+      // Save PDF to device using helper
+      final filePath = await FileDownloadHelper.savePDFToDevice(
+        pdfBytes: pdfBytes,
+        fileName: fileName,
+      );
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        // Show success message with file path and share option
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.9),
+              backgroundColor: OsmeaColors.nordicBlue.withValues(alpha: 0.9),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               title: OsmeaComponents.text(
-                'PDF Preview',
+                'PDF Saved Successfully!',
                 fontSize: context.fontSizeLarge,
                 fontWeight: context.bold,
                 color: Colors.white,
                 textAlign: context.textCenter,
               ),
-              content: SizedBox(
-                width: double.maxFinite,
-                height: 400,
-                child: Column(
-                  children: [
-                    OsmeaComponents.text(
-                      'PDF created successfully!',
-                      fontSize: context.fontSizeMedium,
-                      color: Colors.white,
-                      textAlign: context.textCenter,
+              content: OsmeaComponents.column(
+                children: [
+                  OsmeaComponents.text(
+                    'PDF has been saved to your device.',
+                    fontSize: context.fontSizeMedium,
+                    color: Colors.white,
+                    textAlign: context.textCenter,
+                  ),
+                  OsmeaComponents.sizedBox(height: context.height16),
+                  OsmeaComponents.container(
+                    padding: EdgeInsets.all(context.spacing12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 16),
-                    OsmeaComponents.text(
-                      'Size: ${(pdfBytes.length / 1024).toStringAsFixed(1)} KB',
-                      fontSize: context.fontSizeSmall,
-                      color: Colors.white70,
-                      textAlign: context.textCenter,
-                    ),
-                    const SizedBox(height: 20),
-                    OsmeaComponents.text(
-                      'Extracted Text Preview:',
-                      fontSize: context.fontSizeMedium,
-                      fontWeight: context.semiBold,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(8),
+                    child: OsmeaComponents.column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OsmeaComponents.text(
+                          'File Location:',
+                          fontSize: context.fontSizeSmall,
+                          fontWeight: context.semiBold,
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
-                        child: SingleChildScrollView(
-                          child: OsmeaComponents.text(
-                            state.extractedText.length > 200
-                                ? '${state.extractedText.substring(0, 200)}...'
-                                : state.extractedText,
-                            fontSize: context.fontSizeSmall,
-                            color: Colors.white,
-                          ),
+                        OsmeaComponents.sizedBox(height: context.height4),
+                        OsmeaComponents.text(
+                          filePath,
+                          fontSize: context.fontSizeSmall,
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  OsmeaComponents.sizedBox(height: context.height16),
+                  OsmeaComponents.text(
+                    'What would you like to do?',
+                    fontSize: context.fontSizeMedium,
+                    color: Colors.white,
+                    textAlign: context.textCenter,
+                  ),
+                ],
               ),
               actions: [
                 TextButton(
@@ -781,18 +865,37 @@ class DocumentUploadView extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     Navigator.of(context).pop();
-                    await PDFService.sharePDF(
-                      title:
-                          'Document ${DateTime.now().millisecondsSinceEpoch}',
-                      subject: 'General',
-                      extractedText: state.extractedText,
-                    );
+                    await FileDownloadHelper.openPDF(filePath: filePath);
+
+                    // Show success message
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'PDF saved successfully! Check Files app > On My iPhone.',
+                          ),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.withValues(alpha: 0.8),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: OsmeaComponents.text('Open PDF'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await _sharePDF(context, filePath, fileName);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange.withValues(alpha: 0.8),
                     foregroundColor: Colors.white,
                   ),
-                  child: OsmeaComponents.text('Download PDF'),
+                  child: OsmeaComponents.text('Share PDF'),
                 ),
               ],
             );
@@ -806,7 +909,363 @@ class DocumentUploadView extends StatelessWidget {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create PDF preview: $e'),
+            content: Text('Failed to save PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveAndSharePDF(
+    BuildContext context,
+    Uint8List pdfBytes,
+    String extractedText,
+  ) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: OsmeaColors.nordicBlue.withValues(alpha: 0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Saving and sharing PDF...',
+                  color: Colors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Generate filename
+      final fileName = 'Document_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+      // Save and share PDF using helper
+      await FileDownloadHelper.saveAndSharePDF(
+        pdfBytes: pdfBytes,
+        fileName: fileName,
+        title: fileName,
+      );
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF saved and shared successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save and share PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _sharePDF(
+    BuildContext context,
+    String filePath,
+    String fileName,
+  ) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: OsmeaColors.nordicBlue.withValues(alpha: 0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Opening share dialog...',
+                  color: Colors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Share PDF using helper
+      await FileDownloadHelper.sharePDF(filePath: filePath, title: fileName);
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF shared successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Shows dialog to ask user where to save PDF files
+  Future<void> _showPDFSaveLocationDialog(
+    BuildContext context,
+    List<DocumentFile> pdfDocuments,
+  ) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: OsmeaColors.nordicBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: OsmeaComponents.text(
+            'PDF Files Selected',
+            fontSize: context.fontSizeLarge,
+            fontWeight: context.bold,
+            color: Colors.white,
+            textAlign: context.textCenter,
+          ),
+          content: OsmeaComponents.column(
+            children: [
+              OsmeaComponents.text(
+                'You have selected ${pdfDocuments.length} PDF file(s). What would you like to do?',
+                fontSize: context.fontSizeMedium,
+                color: Colors.white,
+                textAlign: context.textCenter,
+              ),
+              OsmeaComponents.sizedBox(height: context.height16),
+              OsmeaComponents.text(
+                'Selected PDFs:',
+                fontSize: context.fontSizeSmall,
+                fontWeight: context.semiBold,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+              OsmeaComponents.sizedBox(height: context.height8),
+              ...pdfDocuments
+                  .take(3)
+                  .map(
+                    (doc) => Padding(
+                      padding: EdgeInsets.only(bottom: context.height4),
+                      child: OsmeaComponents.text(
+                        '• ${doc.name}',
+                        fontSize: context.fontSizeSmall,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+              if (pdfDocuments.length > 3)
+                OsmeaComponents.text(
+                  '... and ${pdfDocuments.length - 3} more',
+                  fontSize: context.fontSizeSmall,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+            ],
+          ),
+          actions: [
+            // Cancel button
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: OsmeaComponents.text(
+                'Cancel',
+                color: Colors.white.withValues(alpha: 0.8),
+                fontWeight: context.semiBold,
+              ),
+            ),
+            // Process as documents button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Process PDFs as normal documents for OCR
+                context.read<DocumentUploadViewModel>().add(
+                  DocumentUploadDocumentsSelectedEvent(pdfDocuments),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${pdfDocuments.length} PDF(s) selected for text extraction',
+                    ),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.withValues(alpha: 0.8),
+                foregroundColor: Colors.white,
+              ),
+              child: OsmeaComponents.text('Extract Text'),
+            ),
+            // Save to device button
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _savePDFsToDevice(context, pdfDocuments);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.withValues(alpha: 0.8),
+                foregroundColor: Colors.white,
+              ),
+              child: OsmeaComponents.text('Save to Device'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Saves selected PDF files to device
+  Future<void> _savePDFsToDevice(
+    BuildContext context,
+    List<DocumentFile> pdfDocuments,
+  ) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: OsmeaColors.nordicBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: OsmeaComponents.column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(color: Colors.white),
+                const SizedBox(height: 16),
+                OsmeaComponents.text(
+                  'Saving PDFs to device...',
+                  color: Colors.white,
+                  fontSize: context.fontSizeMedium,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Save each PDF to device with location picker
+      for (final document in pdfDocuments) {
+        // Read PDF bytes from file
+        final file = File(document.path);
+        final pdfBytes = await file.readAsBytes();
+
+        final savedPath = await FileDownloadHelper.savePDFWithLocationPicker(
+          pdfBytes: pdfBytes,
+          fileName: document.name,
+        );
+
+        if (savedPath == null) {
+          // User cancelled, break the loop
+          break;
+        }
+      }
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        // Show success dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: OsmeaColors.nordicBlue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: OsmeaComponents.text(
+                'PDFs Saved Successfully!',
+                fontSize: context.fontSizeLarge,
+                fontWeight: context.bold,
+                color: Colors.white,
+                textAlign: context.textCenter,
+              ),
+              content: OsmeaComponents.column(
+                children: [
+                  OsmeaComponents.text(
+                    '${pdfDocuments.length} PDF file(s) have been saved to your device.',
+                    fontSize: context.fontSizeMedium,
+                    color: Colors.white,
+                    textAlign: context.textCenter,
+                  ),
+                  OsmeaComponents.sizedBox(height: context.height16),
+                  OsmeaComponents.text(
+                    'You can find them in the Files app > On My iPhone.',
+                    fontSize: context.fontSizeSmall,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    textAlign: context.textCenter,
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.withValues(alpha: 0.8),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: OsmeaComponents.text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save PDFs: $e'),
             backgroundColor: Colors.red,
           ),
         );
