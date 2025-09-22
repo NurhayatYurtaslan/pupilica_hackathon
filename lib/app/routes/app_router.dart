@@ -4,8 +4,7 @@ import 'package:pupilica_hackathon/app/views/splash/splash_view.dart';
 import 'package:pupilica_hackathon/app/views/onboarding/onboarding_view.dart';
 import 'package:pupilica_hackathon/app/views/home/home_view.dart';
 import 'package:pupilica_hackathon/app/views/document_upload/document_upload_view.dart';
-import 'package:pupilica_hackathon/app/views/lesson_creation/lesson_creation_view.dart';
-import 'package:pupilica_hackathon/core/services/document_service.dart';
+import 'package:pupilica_hackathon/app/views/pdf_preview/pdf_preview_view.dart';
 
 /// App router configuration using Go Router
 class AppRouter {
@@ -13,7 +12,7 @@ class AppRouter {
   static const String onboarding = '/onboarding';
   static const String home = '/home';
   static const String documentUpload = '/document-upload';
-  static const String lessonCreation = '/lesson-creation';
+  static const String pdfPreview = '/pdf-preview';
 
   /// Go Router configuration
   static final GoRouter router = GoRouter(
@@ -47,28 +46,17 @@ class AppRouter {
         builder: (context, state) => const DocumentUploadView(),
       ),
 
-      // Lesson Creation
+      // PDF Preview
       GoRoute(
-        path: lessonCreation,
-        name: 'lessonCreation',
+        path: pdfPreview,
+        name: 'pdfPreview',
         builder: (context, state) {
-          if (state.extra is Map<String, dynamic>) {
-            final extra = state.extra as Map<String, dynamic>;
-            final documents = extra['documents'] as List<DocumentFile>? ?? [];
-            final extractedText = extra['extractedText'] as String? ?? '';
-            return LessonCreationView(
-              documents: documents,
-              extractedText: extractedText,
-            );
-          } else if (state.extra is List<DocumentFile>) {
-            final documents = state.extra as List<DocumentFile>;
-            return LessonCreationView(documents: documents, extractedText: '');
-          } else {
-            return _buildErrorPage(
-              context,
-              Exception('Invalid lesson creation data'),
-            );
-          }
+          final extra = state.extra as Map<String, dynamic>?;
+          return PDFPreviewView(
+            extractedText: extra?['extractedText'] ?? '',
+            documentNames: extra?['documentNames'] ?? [],
+            pdfBytes: extra?['pdfBytes'],
+          );
         },
       ),
     ],
